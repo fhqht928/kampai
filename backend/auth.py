@@ -697,11 +697,22 @@ def update_user_plan(user_id: int, plan: str, payment_key: str = None, order_id:
 
 
 def get_subscription_status(user_id: int) -> dict:
-    """구독 상태 조회"""
+    """구독 상태 조회 (users 테이블 + subscriptions 테이블)"""
     conn = get_db_connection()
     c = conn.cursor()
     ph = get_placeholder()
     
+    # 먼저 users 테이블에서 현재 플랜 조회
+    c.execute(f"SELECT plan FROM users WHERE id = {ph}", (user_id,))
+    user_result = c.fetchone()
+    
+    if not user_result:
+        conn.close()
+        return {"active": False, "plan": "free"}
+    
+    user_plan = user_result[0] if IS_POSTGRES else user_result['plan']
+    
+    # subscriptions 테이블에서 상세 정보 조회
     c.execute(f'''
         SELECT plan, status, started_at, expires_at 
         FROM subscriptions 
@@ -712,8 +723,16 @@ def get_subscription_status(user_id: int) -> dict:
     sub = c.fetchone()
     conn.close()
     
+    # 구독 기록이 없으면 users 테이블의 플랜 사용
     if not sub:
-        return {"active": False, "plan": "free"}
+        return {
+            "active": user_plan != 'free',
+            "plan": user_plan,
+            "status": "active" if user_plan != 'free' else None,
+            "started_at": None,
+            "expires_at": None,
+            "is_expired": False
+        }
     
     # Row에서 값 추출
     if IS_POSTGRES:
@@ -733,9 +752,12 @@ def get_subscription_status(user_id: int) -> dict:
             expires_at_dt = expires_at
         is_expired = datetime.now() > expires_at_dt
     
+    # users 테이블의 플랜을 우선 사용 (관리자가 직접 변경할 수 있으므로)
+    final_plan = user_plan if user_plan else plan
+    
     return {
         "active": not is_expired,
-        "plan": plan,
+        "plan": final_plan,
         "status": status,
         "started_at": str(started_at) if started_at else None,
         "expires_at": str(expires_at) if expires_at else None,

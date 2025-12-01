@@ -1800,6 +1800,13 @@
                     authState.subscription = data;
                     authState.remainingGenerations = data.remaining_today;
                     
+                    // authState.user.plan도 동기화
+                    if (authState.user && data.plan) {
+                        authState.user.plan = data.plan;
+                    }
+                    
+                    console.log('📊 구독 정보:', data.plan, '남은 생성:', data.remaining_today);
+                    
                     // 모델 선택 UI 업데이트
                     await updateModelOptions();
                 }
@@ -1810,9 +1817,11 @@
 
         // 모델 선택 옵션 업데이트
         async function updateModelOptions() {
-            const plan = authState.subscription?.plan || 'free';
+            const plan = authState.subscription?.plan || authState.user?.plan || 'free';
             const modelSection = document.getElementById('modelSelectSection');
             const modelBadge = document.getElementById('modelBadge');
+            
+            console.log('🔧 모델 옵션 업데이트 - 플랜:', plan);
             
             // Pro/Business만 모델 선택 가능
             if (plan === 'pro' || plan === 'business') {
@@ -1823,10 +1832,12 @@
                     state.selectedModel = 'qwen-image';
                 }
                 updateModelBadge();
+                console.log('✅ Pro/Business 플랜 - 모델 선택 활성화');
             } else {
                 modelSection.style.display = 'none';
                 state.selectedModel = 'flux-schnell';
                 modelBadge.textContent = 'FLUX.1-schnell';
+                console.log('⚠️ Free/Basic 플랜 - 기본 모델 사용');
             }
         }
 
@@ -1891,16 +1902,22 @@
                     <a href="index.html#" onclick="location.href='index.html'; return false;" class="login-link">로그인</a>
                 `;
             } else {
-                const planNames = { 'free': '무료', 'pro': 'Pro', 'business': 'Business' };
-                const plan = authState.subscription?.plan || 'free';
+                const planNames = { 'free': '무료', 'basic': 'Basic', 'pro': 'Pro', 'business': 'Business' };
+                const plan = authState.subscription?.plan || authState.user?.plan || 'free';
                 const planName = planNames[plan] || plan;
                 
                 let usageText = '';
                 if (plan === 'free') {
                     usageText = ` (${authState.remainingGenerations}/3 남음)`;
-                } else if (plan === 'pro' || plan === 'business') {
-                    usageText = ' (무제한)';
+                } else if (plan === 'basic') {
+                    usageText = ` (${authState.remainingGenerations}/30 남음)`;
+                } else if (plan === 'pro') {
+                    usageText = ` (${authState.remainingGenerations}/100 남음)`;
+                } else if (plan === 'business') {
+                    usageText = ` (${authState.remainingGenerations}/500 남음)`;
                 }
+                
+                console.log('🎯 인증 UI 업데이트 - 플랜:', plan, '남은 생성:', authState.remainingGenerations);
                 
                 authBadge.innerHTML = `
                     <span class="auth-status logged-in">
@@ -1919,25 +1936,33 @@
         
         // Pro 전용 탭 잠금 상태 업데이트
         function updateProTabsLockState() {
-            const plan = authState.subscription?.plan || 'free';
+            const plan = authState.subscription?.plan || authState.user?.plan || 'free';
             const isPro = (plan === 'pro' || plan === 'business');
+            
+            console.log('🔒 탭 잠금 상태 업데이트 - 플랜:', plan, 'isPro:', isPro);
             
             const transformTab = document.getElementById('transformTab');
             const tryonTab = document.getElementById('tryonTab');
+            const transformProBadge = document.getElementById('transformProBadge');
+            const tryonProBadge = document.getElementById('tryonProBadge');
             
             if (transformTab) {
                 if (isPro) {
                     transformTab.classList.remove('locked');
+                    if (transformProBadge) transformProBadge.style.display = 'none';
                 } else {
                     transformTab.classList.add('locked');
+                    if (transformProBadge) transformProBadge.style.display = 'inline-block';
                 }
             }
             
             if (tryonTab) {
                 if (isPro) {
                     tryonTab.classList.remove('locked');
+                    if (tryonProBadge) tryonProBadge.style.display = 'none';
                 } else {
                     tryonTab.classList.add('locked');
+                    if (tryonProBadge) tryonProBadge.style.display = 'inline-block';
                 }
             }
         }
@@ -2249,7 +2274,8 @@
                     promptInput.placeholder = '원하는 이미지를 한글로 설명하세요...\n\n예: 해질녘 바다 위의 등대, 파도가 치는 모습';
                     document.getElementById('modeDescription').style.display = 'none';
                     // Pro/Business면 모델 선택 표시
-                    if (authState.isLoggedIn && ['pro', 'business'].includes(authState.user?.plan)) {
+                    const userPlan = authState.subscription?.plan || authState.user?.plan || 'free';
+                    if (authState.isLoggedIn && ['pro', 'business'].includes(userPlan)) {
                         document.getElementById('modelSelectSection').style.display = 'block';
                     }
                 }
@@ -2263,7 +2289,8 @@
                     showToast('이미지를 업로드하고 변경할 내용을 입력하세요. (Pro/Business 전용)', 'info');
                     selectFlux2Pro();
                     // Pro/Business면 모델 선택 표시
-                    if (authState.isLoggedIn && ['pro', 'business'].includes(authState.user?.plan)) {
+                    const userPlan = authState.subscription?.plan || authState.user?.plan || 'free';
+                    if (authState.isLoggedIn && ['pro', 'business'].includes(userPlan)) {
                         document.getElementById('modelSelectSection').style.display = 'block';
                     }
                 }
@@ -2854,13 +2881,15 @@
     <script>
         // 마이페이지 모달 열기
         function openAccountModal() {
-            const plan = authState.subscription?.plan || 'free';
+            const plan = authState.subscription?.plan || authState.user?.plan || 'free';
             const planInfo = {
                 'free': { name: 'Free', price: 0, daily: '3장' },
                 'basic': { name: 'Basic', price: 4900, daily: '30장' },
                 'pro': { name: 'Pro', price: 19900, daily: '100장' },
                 'business': { name: 'Business', price: 99000, daily: '500장' }
             }[plan] || { name: 'Free', price: 0, daily: '3장' };
+            
+            console.log('📋 마이페이지 열기 - 플랜:', plan);
             
             document.getElementById('modalAccountEmail').textContent = authState.user?.email || '-';
             document.getElementById('modalAccountPlan').textContent = planInfo.name;
