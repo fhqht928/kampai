@@ -1870,7 +1870,7 @@
             if (!token) return;
 
             try {
-                await fetch(`${API_URL}/api/usage/record`, {
+                const response = await fetch(`${API_URL}/api/usage/record`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1879,13 +1879,35 @@
                     body: JSON.stringify({ action: 'generate' })
                 });
                 
-                // 남은 횟수 업데이트
-                if (authState.subscription?.plan === 'free' && authState.remainingGenerations > 0) {
-                    authState.remainingGenerations--;
+                const data = await response.json();
+                
+                // 서버에서 반환한 최신 사용량으로 업데이트
+                if (data.success && data.usage) {
+                    const plan = authState.subscription?.plan || authState.user?.plan || 'free';
+                    const dailyLimit = data.usage.daily_limit || 3;
+                    const usedToday = data.usage.today || data.usage.today_count || 0;
+                    
+                    // 무제한(-1)이 아니면 남은 횟수 계산
+                    if (dailyLimit > 0) {
+                        authState.remainingGenerations = Math.max(0, dailyLimit - usedToday);
+                    }
+                    
+                    console.log('📊 사용량 업데이트:', { plan, dailyLimit, usedToday, remaining: authState.remainingGenerations });
                     updateAuthUI();
+                } else {
+                    // 폴백: 로컬에서 감소
+                    if (authState.remainingGenerations > 0) {
+                        authState.remainingGenerations--;
+                        updateAuthUI();
+                    }
                 }
             } catch (error) {
                 console.error('Usage record failed:', error);
+                // 에러 시에도 로컬에서 감소
+                if (authState.remainingGenerations > 0) {
+                    authState.remainingGenerations--;
+                    updateAuthUI();
+                }
             }
         }
 
