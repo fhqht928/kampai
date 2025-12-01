@@ -2165,11 +2165,7 @@
             
             // 분위기
             '평화로운': 'peaceful', '고요한': 'serene', '활기찬': 'vibrant',
-            '로맨틱한': 'romantic', '드라마틱한': 'dramatic', '편안한': 'cozy',
-            
-            // 조사/접속사 제거용
-            '을': '', '를': '', '이': '', '가': '', '은': '', '는': '',
-            '에서': '', '에': '', '의': '', '과': '', '와': '', '으로': '', '로': ''
+            '로맨틱한': 'romantic', '드라마틱한': 'dramatic', '편안한': 'cozy'
         };
         
         // 한글 포함 여부 체크
@@ -2181,17 +2177,24 @@
         function optimizeKoreanPrompt(koreanText) {
             let result = koreanText;
             
-            // 긴 표현부터 먼저 변환 (순서 중요!)
-            const sortedEntries = Object.entries(koreanToEnglish).sort((a, b) => b[0].length - a[0].length);
-            
-            for (const [korean, english] of sortedEntries) {
-                if (korean && english) {  // 빈 값 제외
-                    const regex = new RegExp(korean, 'g');
-                    result = result.replace(regex, english);
-                }
+            // 1단계: 조사 먼저 제거 (빈 문자열로 대체)
+            const particles = ['을', '를', '이', '가', '은', '는', '에서', '에', '의', '과', '와', '으로', '로', '도', '만', '까지', '부터', '처럼', '같은', '하는', '하고', '하며'];
+            for (const particle of particles) {
+                const regex = new RegExp(particle, 'g');
+                result = result.replace(regex, ' ');
             }
             
-            // 남은 한글 문자 제거 (변환 안 된 것들)
+            // 2단계: 긴 표현부터 먼저 변환 (순서 중요!)
+            const sortedEntries = Object.entries(koreanToEnglish)
+                .filter(([k, v]) => k && v)  // 빈 값 제외
+                .sort((a, b) => b[0].length - a[0].length);
+            
+            for (const [korean, english] of sortedEntries) {
+                const regex = new RegExp(korean, 'g');
+                result = result.replace(regex, english);
+            }
+            
+            // 3단계: 남은 한글 문자 제거 (변환 안 된 것들)
             result = result.replace(/[가-힣]+/g, '');
             
             // 중복 공백, 쉼표 정리
@@ -2386,7 +2389,7 @@
             fileInput.value = '';
         });
 
-        // AI 프롬프트 최적화 (Ollama LLM 사용)
+        // AI 프롬프트 최적화 (MyMemory 무료 번역 API 사용)
         optimizeBtn.addEventListener('click', async () => {
             const prompt = promptInput.value.trim();
             if (!prompt) {
@@ -2404,41 +2407,47 @@
             optimizeBtn.innerHTML = '<div class="spinner"></div><span>AI 번역 중...</span>';
             
             try {
-                // Ollama API 호출
-                const response = await fetch(`${API_URL}/api/translate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: prompt,
-                        style: state.style || ''
-                    })
-                });
-                
+                // MyMemory 무료 번역 API 사용
+                const response = await fetch(
+                    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(prompt)}&langpair=ko|en`
+                );
                 const data = await response.json();
                 
-                if (data.success) {
-                    // 선택된 태그 추가
-                    let finalPrompt = data.translated;
-                    if (state.selectedTags.length > 0) {
-                        finalPrompt += ', ' + state.selectedTags.join(', ');
+                if (data.responseStatus === 200 && data.responseData?.translatedText) {
+                    let translatedPrompt = data.responseData.translatedText;
+                    
+                    // 선택된 스타일 프리셋 추가
+                    if (state.stylePrompt) {
+                        translatedPrompt = translatedPrompt + ', ' + state.stylePrompt;
                     }
                     
-                    state.optimizedPrompt = finalPrompt;
-                    optimizedText.textContent = finalPrompt;
+                    // 선택된 태그 추가
+                    if (state.selectedTags.length > 0) {
+                        translatedPrompt = translatedPrompt + ', ' + state.selectedTags.join(', ');
+                    }
+                    
+                    // 기본 품질 태그 추가
+                    if (!translatedPrompt.toLowerCase().includes('quality') && !translatedPrompt.toLowerCase().includes('detailed')) {
+                        translatedPrompt += ', high quality, detailed';
+                    }
+                    
+                    state.optimizedPrompt = translatedPrompt;
+                    optimizedText.textContent = translatedPrompt;
                     optimizedPromptEl.classList.add('active');
                     
-                    showToast('🧠 AI가 프롬프트를 최적화했습니다!', 'success');
-                    console.log('🧠 Ollama 번역 결과:', data);
+                    showToast('✨ AI가 프롬프트를 영어로 번역했습니다!', 'success');
+                    console.log('📝 번역 결과:', translatedPrompt);
                 } else {
-                    throw new Error(data.error || '번역 실패');
+                    throw new Error('번역 실패');
                 }
             } catch (error) {
                 console.error('번역 오류:', error);
                 
-                // 폴백: 기존 사전 기반 변환
-                showToast('⚠️ AI 서버 연결 실패, 기본 변환 사용', 'error');
-                state.optimizedPrompt = optimizeKoreanPrompt(prompt);
-                optimizedText.textContent = state.optimizedPrompt;
+                // 폴백: 사전 기반 변환
+                showToast('⚠️ 번역 서버 연결 실패, 기본 변환 사용', 'error');
+                const fallbackPrompt = optimizeKoreanPrompt(prompt);
+                state.optimizedPrompt = fallbackPrompt;
+                optimizedText.textContent = fallbackPrompt;
                 optimizedPromptEl.classList.add('active');
             } finally {
                 optimizeBtn.disabled = false;
