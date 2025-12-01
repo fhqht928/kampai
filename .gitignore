@@ -1,0 +1,42 @@
+# 환경 변수 (API 키 포함)
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+
+# 데이터베이스 (로컬 개발용)
+*.db
+
+# 업로드/출력 폴더 내 파일들
+uploads/*
+outputs/*
+!uploads/.gitkeep
+!outputs/.gitkeep
+
+# 대용량 모델 파일
+*.safetensors
+*.ckpt
+*.pth
+*.bin

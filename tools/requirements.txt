@@ -1,0 +1,22 @@
+# AI Studio 자동화 도구 - 요구사항
+# Python 3.10+ 권장
+
+# 이미지 처리
+Pillow>=10.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# 배경 제거 (선택사항)
+# rembg>=2.0.50
+
+# 업스케일 (선택사항, GPU 필요)
+# realesrgan>=0.3.0
+
+# 유틸리티
+tqdm>=4.65.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# 웹 관련 (견적 폼 백엔드용)
+# flask>=3.0.0
+# flask-cors>=4.0.0

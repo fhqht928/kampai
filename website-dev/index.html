@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kampai | AI 이미지 생성 플랫폼</title>
+    <meta name="description" content="Kampai - 누구나 쉽게 사용하는 AI 이미지 생성 플랫폼. 구독 한 번으로 무제한 이미지 생성.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .before-after-slider {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="font-sans bg-white text-gray-800">
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold gradient-text">🍺 Kampai</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-primary-600 transition">기능</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-primary-600 transition">요금제</a>
+                    <a href="#faq" class="text-gray-600 hover:text-primary-600 transition">FAQ</a>
+                    <a href="generate.html" class="text-gray-600 hover:text-primary-600 transition">이미지 생성</a>
+                    <a href="#login" class="text-gray-600 hover:text-primary-600 transition" onclick="openLoginModal()">로그인</a>
+                    <a href="#signup" class="gradient-bg text-white px-6 py-2 rounded-full hover:opacity-90 transition" onclick="openSignupModal()">무료 시작</a>
+                </div>
+                <button class="md:hidden" onclick="toggleMenu()">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#features" class="block text-gray-600 hover:text-primary-600">기능</a>
+                <a href="#pricing" class="block text-gray-600 hover:text-primary-600">요금제</a>
+                <a href="generate.html" class="block text-gray-600 hover:text-primary-600">이미지 생성</a>
+                <a href="#login" class="block text-gray-600 hover:text-primary-600" onclick="openLoginModal()">로그인</a>
+                <a href="#signup" class="block gradient-bg text-white text-center py-2 rounded-full" onclick="openSignupModal()">무료 시작</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-gray-50 to-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="inline-block px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-6">
+                        🍺 건배! AI 이미지 생성의 새로운 시작
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                        <span class="gradient-text">상상을 현실로</span><br>
+                        Kampai
+                    </h1>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        한국어로 설명하면 AI가 고품질 이미지를 생성합니다.<br>
+                        <strong>월 9,900원</strong>으로 <strong>무제한 이미지 생성</strong><br>
+                        지금 바로 시작하세요!
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#signup" onclick="openSignupModal()" class="gradient-bg text-white px-8 py-4 rounded-full text-center font-medium hover:opacity-90 transition shadow-lg">
+                            무료로 시작하기
+                        </a>
+                        <a href="generate.html" class="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-full text-center font-medium hover:border-primary-500 hover:text-primary-600 transition">
+                            먼저 체험하기 →
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-8 mt-8 text-sm text-gray-500">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                            <span>한국어 지원</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                            <span>신용카드 불필요</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="animate-float">
+                        <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=500&fit=crop" 
+                             alt="AI 이미지 생성 예시" 
+                             class="rounded-2xl shadow-2xl">
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-lg">10초 만에</p>
+                                <p class="text-gray-500 text-sm">이미지 생성</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-12 bg-white border-y border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <p class="text-3xl md:text-4xl font-bold gradient-text">10초</p>
+                    <p class="text-gray-500 mt-1">이미지 생성</p>
+                </div>
+                <div>
+                    <p class="text-3xl md:text-4xl font-bold gradient-text">9+</p>
+                    <p class="text-gray-500 mt-1">스타일 프리셋</p>
+                </div>
+                <div>
+                    <p class="text-3xl md:text-4xl font-bold gradient-text">한국어</p>
+                    <p class="text-gray-500 mt-1">AI 번역 지원</p>
+                </div>
+                <div>
+                    <p class="text-3xl md:text-4xl font-bold gradient-text">무제한</p>
+                    <p class="text-gray-500 mt-1">Pro 플랜</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">왜 Kampai인가요?</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    누구나 쉽게 전문가 수준의 이미지를 만들 수 있습니다
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white rounded-2xl p-6 card-hover shadow-sm">
+                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="languages" class="w-7 h-7 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">한국어 지원</h3>
+                    <p class="text-gray-600 text-sm mb-4">
+                        한국어로 설명하면 AI가 자동으로 최적화된 영어 프롬프트로 변환
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-white rounded-2xl p-6 card-hover shadow-sm">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="palette" class="w-7 h-7 text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">9+ 스타일</h3>
+                    <p class="text-gray-600 text-sm mb-4">
+                        실사, 3D, 애니메, 사이버펑크 등 다양한 스타일 프리셋 제공
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-white rounded-2xl p-6 card-hover shadow-sm">
+                    <div class="w-14 h-14 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="wand-2" class="w-7 h-7 text-pink-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">프롬프트 빌더</h3>
+                    <p class="text-gray-600 text-sm mb-4">
+                        클릭만으로 구도, 조명, 분위기 등을 쉽게 설정
+                    </p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-white rounded-2xl p-6 card-hover shadow-sm">
+                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="zap" class="w-7 h-7 text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">빠른 생성</h3>
+                    <p class="text-gray-600 text-sm mb-4">
+                        최신 FLUX 모델로 10초 이내 고품질 이미지 생성
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">이용 방법</h2>
+                <p class="text-gray-600">3단계로 간단하게 시작하세요</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">1</div>
+                    <h3 class="font-bold text-lg mb-2">회원가입</h3>
+                    <p class="text-gray-600 text-sm">이메일로 간단하게 가입하세요</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">2</div>
+                    <h3 class="font-bold text-lg mb-2">플랜 선택</h3>
+                    <p class="text-gray-600 text-sm">무료 체험 또는 구독 플랜 선택</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">3</div>
+                    <h3 class="font-bold text-lg mb-2">이미지 생성</h3>
+                    <p class="text-gray-600 text-sm">한국어로 설명하고 생성 버튼 클릭!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section - 4단계 구독제 -->
+    <section id="pricing" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">요금제</h2>
+                <p class="text-gray-600">필요에 맞는 플랜을 선택하세요</p>
+            </div>
+            
+            <div class="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                <!-- Free Plan -->
+                <div class="bg-white rounded-2xl p-6 border-2 border-gray-200 card-hover">
+                    <h3 class="text-xl font-bold mb-2">Free</h3>
+                    <p class="text-gray-500 text-sm mb-4">체험해보기</p>
+                    <div class="mb-4">
+                        <span class="text-3xl font-bold">0</span>
+                        <span class="text-gray-500">원/월</span>
+                    </div>
+                    <ul class="space-y-2 mb-6 text-sm">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            하루 <strong>3장</strong>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            FLUX Schnell
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            1024x1024
+                        </li>
+                        <li class="flex items-center gap-2 text-gray-400">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            워터마크 있음
+                        </li>
+                    </ul>
+                    <a href="#signup" onclick="openSignupModal('free')" class="block text-center py-2.5 border-2 border-gray-300 text-gray-600 rounded-full font-medium hover:bg-gray-50 transition text-sm">
+                        무료 시작
+                    </a>
+                </div>
+                
+                <!-- Basic Plan -->
+                <div class="bg-white rounded-2xl p-6 border-2 border-gray-200 card-hover">
+                    <h3 class="text-xl font-bold mb-2">Basic</h3>
+                    <p class="text-gray-500 text-sm mb-4">가벼운 사용</p>
+                    <div class="mb-4">
+                        <span class="text-3xl font-bold">4,900</span>
+                        <span class="text-gray-500">원/월</span>
+                    </div>
+                    <ul class="space-y-2 mb-6 text-sm">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            하루 <strong>30장</strong>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            FLUX Schnell
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            1024x1024
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            워터마크 없음
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            상업적 사용 OK
+                        </li>
+                    </ul>
+                    <a href="#signup" onclick="openSignupModal('basic')" class="block text-center py-2.5 border-2 border-primary-500 text-primary-600 rounded-full font-medium hover:bg-primary-50 transition text-sm">
+                        Basic 시작
+                    </a>
+                </div>
+                
+                <!-- Pro Plan (Popular) -->
+                <div class="bg-white rounded-2xl p-6 border-2 border-primary-500 card-hover relative">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 gradient-bg text-white text-xs rounded-full">
+                        인기
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Pro</h3>
+                    <p class="text-gray-500 text-sm mb-4">크리에이터용</p>
+                    <div class="mb-4">
+                        <span class="text-3xl font-bold gradient-text">19,900</span>
+                        <span class="text-gray-500">원/월</span>
+                    </div>
+                    <ul class="space-y-2 mb-6 text-sm">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            하루 <strong>100장</strong>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4 text-purple-500"></i>
+                            <strong>모델 선택 가능</strong>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="type" class="w-4 h-4 text-blue-500"></i>
+                            Qwen-Image (텍스트 특화)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-yellow-500"></i>
+                            FLUX 2 Pro (이미지 편집)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="maximize" class="w-4 h-4 text-green-500"></i>
+                            FLUX Pro Ultra (4K)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            최대 2048x2048
+                        </li>
+                    </ul>
+                    <a href="#signup" onclick="openSignupModal('pro')" class="block text-center py-2.5 gradient-bg text-white rounded-full font-medium hover:opacity-90 transition text-sm">
+                        Pro 시작하기
+                    </a>
+                </div>
+                
+                <!-- Business Plan -->
+                <div class="bg-white rounded-2xl p-6 border-2 border-gray-200 card-hover">
+                    <h3 class="text-xl font-bold mb-2">Business</h3>
+                    <p class="text-gray-500 text-sm mb-4">팀/기업용</p>
+                    <div class="mb-4">
+                        <span class="text-3xl font-bold">99,000</span>
+                        <span class="text-gray-500">원/월</span>
+                    </div>
+                    <ul class="space-y-2 mb-6 text-sm">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            하루 <strong>500장</strong>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4 text-purple-500"></i>
+                            <strong>모델 선택 가능</strong>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            Qwen + FLUX 2 Pro + Ultra
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="users" class="w-4 h-4 text-green-500"></i>
+                            팀원 5명
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="code" class="w-4 h-4 text-green-500"></i>
+                            API 액세스
+                        </li>
+                    </ul>
+                    <a href="#signup" onclick="openSignupModal('business')" class="block text-center py-2.5 border-2 border-gray-400 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition text-sm">
+                        Business 시작하기
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Model Comparison -->
+            <div class="mt-12 max-w-5xl mx-auto">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
+                    <h4 class="font-bold mb-4 text-center">🤖 AI 모델 비교</h4>
+                    <div class="grid md:grid-cols-4 gap-4 text-center text-sm">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="font-bold text-lg mb-1">FLUX Schnell</div>
+                            <div class="text-gray-500">Free / Basic</div>
+                            <div class="text-xs text-gray-400 mt-2">⚡ 빠른 생성 (2-4초)</div>
+                        </div>
+                        <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                            <div class="font-bold text-lg mb-1 text-blue-600">Qwen-Image</div>
+                            <div class="text-blue-500">Pro / Business</div>
+                            <div class="text-xs text-gray-400 mt-2">🔤 텍스트/한글 특화</div>
+                        </div>
+                        <div class="p-4 bg-yellow-50 rounded-lg border-2 border-yellow-300">
+                            <div class="font-bold text-lg mb-1 text-yellow-600">FLUX 2 Pro</div>
+                            <div class="text-yellow-600">Pro / Business</div>
+                            <div class="text-xs text-gray-400 mt-2">🌟 이미지 편집 • 레퍼런스 8장</div>
+                        </div>
+                        <div class="p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
+                            <div class="font-bold text-lg mb-1 text-purple-600">FLUX Pro Ultra</div>
+                            <div class="text-purple-500">Pro / Business</div>
+                            <div class="text-xs text-gray-400 mt-2">🎨 4K 초고해상도</div>
+                        </div>
+                    </div>
+                    <p class="text-center text-xs text-gray-400 mt-4">
+                        Pro/Business 플랜에서 용도에 맞는 모델을 선택하세요
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Additional Info -->
+            <div class="mt-8 text-center">
+                <p class="text-gray-500 text-sm">
+                    💳 신용카드/체크카드/카카오페이 결제 가능 • 언제든 해지 가능 • 환불 보장
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-white">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">자주 묻는 질문</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-xl">
+                    <button class="w-full px-6 py-4 text-left font-medium flex justify-between items-center" onclick="toggleFaq(this)">
+                        <span>생성한 이미지의 저작권은 누구에게 있나요?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            Pro 이상 플랜에서 생성한 이미지는 상업적 사용이 가능하며, 
+                            모든 권리는 생성한 사용자에게 있습니다. Free 플랜은 개인 사용만 가능합니다.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl">
+                    <button class="w-full px-6 py-4 text-left font-medium flex justify-between items-center" onclick="toggleFaq(this)">
+                        <span>무제한이면 정말 제한 없이 생성할 수 있나요?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            네, Pro 플랜은 월 생성 제한이 없습니다. 다만 서버 보호를 위해 
+                            분당 생성 횟수에는 제한이 있을 수 있습니다. (분당 약 10회)
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl">
+                    <button class="w-full px-6 py-4 text-left font-medium flex justify-between items-center" onclick="toggleFaq(this)">
+                        <span>한국어가 잘 안 되는 경우는 어떻게 하나요?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            한국어 입력 시 AI가 자동으로 최적화된 영어 프롬프트로 변환합니다.
+                            더 정확한 결과를 원하시면 스타일 프리셋과 프롬프트 빌더를 함께 활용해보세요.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl">
+                    <button class="w-full px-6 py-4 text-left font-medium flex justify-between items-center" onclick="toggleFaq(this)">
+                        <span>구독 해지는 어떻게 하나요?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            마이페이지 > 구독 관리에서 언제든 해지할 수 있습니다.
+                            해지 후에도 결제 기간 종료일까지는 서비스를 이용하실 수 있습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 gradient-bg">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                지금 바로 시작하세요
+            </h2>
+            <p class="text-white/80 text-lg mb-8">
+                무료로 3장까지 체험해보고, 마음에 드시면 구독하세요!
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#signup" onclick="openSignupModal()" class="bg-white text-purple-600 px-8 py-4 rounded-full font-medium hover:bg-gray-100 transition shadow-lg">
+                    무료로 시작하기
+                </a>
+                <a href="generate.html" class="border-2 border-white text-white px-8 py-4 rounded-full font-medium hover:bg-white/10 transition">
+                    먼저 체험하기 →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <span class="text-2xl font-bold">🍺 Kampai</span>
+                    <p class="text-gray-400 mt-4 text-sm">
+                        상상을 현실로,<br>AI 이미지 생성 플랫폼
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">서비스</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="generate.html" class="hover:text-white transition">이미지 생성</a></li>
+                        <li><a href="#pricing" class="hover:text-white transition">요금제</a></li>
+                        <li><a href="#faq" class="hover:text-white transition">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">고객 지원</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="mailto:support@kampai.kr" class="hover:text-white transition">support@kampai.kr</a></li>
+                        <li><a href="#" class="hover:text-white transition">이용약관</a></li>
+                        <li><a href="#" class="hover:text-white transition">개인정보처리방침</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">소셜 미디어</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition">
+                            <i data-lucide="instagram" class="w-5 h-5"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition">
+                            <i data-lucide="twitter" class="w-5 h-5"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-sm text-gray-400">
+                <p>© 2025 Kampai. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
+            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-center">로그인</h2>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">이메일</label>
+                    <input type="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">비밀번호</label>
+                    <input type="password" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none">
+                </div>
+                <button type="submit" class="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 transition">
+                    로그인
+                </button>
+            </form>
+            <div class="mt-6 text-center text-sm text-gray-500">
+                계정이 없으신가요? <a href="#" onclick="switchToSignup()" class="text-primary-600 font-medium">회원가입</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
+            <button onclick="closeSignupModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-2 text-center">무료로 시작하기</h2>
+            <p class="text-gray-500 text-center mb-6">매일 3장 무료 생성!</p>
+            <form id="signupForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">이메일</label>
+                    <input type="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">비밀번호</label>
+                    <input type="password" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none" placeholder="8자 이상">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">비밀번호 확인</label>
+                    <input type="password" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none">
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="terms" required class="w-4 h-4">
+                    <label for="terms" class="text-sm text-gray-600"><a href="#" class="text-primary-600">이용약관</a> 및 <a href="#" class="text-primary-600">개인정보처리방침</a>에 동의합니다</label>
+                </div>
+                <button type="submit" class="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 transition">
+                    가입하기
+                </button>
+            </form>
+            <div class="mt-6 text-center text-sm text-gray-500">
+                이미 계정이 있으신가요? <a href="#" onclick="switchToLogin()" class="text-primary-600 font-medium">로그인</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // API URL
+        const API_URL = 'http://localhost:5000';
+        
+        // 인증 상태 관리
+        let authToken = localStorage.getItem('kampai_token');
+        let currentUser = JSON.parse(localStorage.getItem('kampai_user') || 'null');
+        
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // 페이지 로드 시 인증 상태 확인
+        document.addEventListener('DOMContentLoaded', () => {
+            if (authToken) {
+                checkAuthStatus();
+            }
+            updateNavUI();
+        });
+        
+        // 인증 상태 확인
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch(`${API_URL}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    localStorage.setItem('kampai_user', JSON.stringify(currentUser));
+                    updateNavUI();
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+        }
+        
+        // 네비게이션 UI 업데이트
+        function updateNavUI() {
+            const navRight = document.querySelector('.hidden.md\\:flex');
+            const loginLink = navRight.querySelector('a[onclick="openLoginModal()"]');
+            const signupLink = navRight.querySelector('a[onclick*="openSignupModal"]');
+            
+            if (currentUser) {
+                // 로그인 상태
+                if (loginLink) loginLink.outerHTML = `<a href="generate.html" class="text-gray-600 hover:text-primary-600 transition">내 계정 (${currentUser.plan})</a>`;
+                if (signupLink) signupLink.outerHTML = `<a href="#" onclick="logout()" class="gradient-bg text-white px-6 py-2 rounded-full hover:opacity-90 transition">로그아웃</a>`;
+            }
+        }
+        
+        // 로그아웃
+        function logout() {
+            localStorage.removeItem('kampai_token');
+            localStorage.removeItem('kampai_user');
+            localStorage.removeItem('kampai_selected_plan');
+            authToken = null;
+            currentUser = null;
+            location.reload();
+        }
+        
+        // 선택된 플랜
+        let selectedPlan = null;
+        
+        // 플랜별 가격 정보
+        const PLAN_INFO = {
+            free: { name: '무료', price: 0, daily: 3 },
+            basic: { name: 'Basic', price: 4900, daily: 30 },
+            pro: { name: 'Pro', price: 19900, daily: 100 },
+            business: { name: 'Business', price: 99000, daily: 500 }
+        };
+        
+        // Mobile menu toggle
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // FAQ toggle
+        function toggleFaq(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('i');
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+        
+        // Modal functions
+        function openLoginModal(plan = null) {
+            if (event) event.preventDefault();
+            if (plan) {
+                selectedPlan = plan;
+                localStorage.setItem('kampai_selected_plan', plan);
+                updateModalPlanInfo('login');
+            }
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        function openSignupModal(plan = null) {
+            if (event) event.preventDefault();
+            if (plan) {
+                selectedPlan = plan;
+                localStorage.setItem('kampai_selected_plan', plan);
+                updateModalPlanInfo('signup');
+            }
+            // 이미 로그인된 상태면 바로 결제로
+            if (currentUser && selectedPlan && selectedPlan !== 'free') {
+                goToPayment(selectedPlan);
+                return;
+            }
+            document.getElementById('signupModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeSignupModal() {
+            document.getElementById('signupModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        // 모달에 선택된 플랜 정보 표시
+        function updateModalPlanInfo(modalType) {
+            if (!selectedPlan || selectedPlan === 'free') return;
+            
+            const planInfo = PLAN_INFO[selectedPlan];
+            const modalId = modalType === 'login' ? 'loginModal' : 'signupModal';
+            const modal = document.getElementById(modalId);
+            
+            // 기존 플랜 배너 제거
+            const existingBanner = modal.querySelector('.plan-banner');
+            if (existingBanner) existingBanner.remove();
+            
+            // 플랜 배너 추가
+            const modalContent = modal.querySelector('.bg-white');
+            const banner = document.createElement('div');
+            banner.className = 'plan-banner bg-gradient-to-r from-purple-500 to-blue-500 text-white p-3 rounded-t-xl -mx-6 -mt-6 mb-4 text-center';
+            banner.innerHTML = `
+                <div class="text-sm opacity-90">선택한 플랜</div>
+                <div class="font-bold text-lg">${planInfo.name} - ${planInfo.price.toLocaleString()}원/월</div>
+                <div class="text-xs opacity-75">하루 ${planInfo.daily}장 생성</div>
+            `;
+            modalContent.insertBefore(banner, modalContent.firstChild);
+        }
+        
+        // 결제 페이지로 이동
+        function goToPayment(plan) {
+            if (plan === 'free') {
+                window.location.href = 'generate.html';
+                return;
+            }
+            // 결제 페이지로 이동 (플랜 정보 포함)
+            window.location.href = `payment.html?plan=${plan}`;
+        }
+        
+        function switchToSignup() {
+            event.preventDefault();
+            closeLoginModal();
+            setTimeout(openSignupModal, 100);
+        }
+        
+        function switchToLogin() {
+            event.preventDefault();
+            closeSignupModal();
+            setTimeout(openLoginModal, 100);
+        }
+        
+        // Close modals on outside click
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) closeLoginModal();
+        });
+        document.getElementById('signupModal').addEventListener('click', function(e) {
+            if (e.target === this) closeSignupModal();
+        });
+        
+        // 로그인 폼
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const email = this.querySelector('input[type="email"]').value;
+            const password = this.querySelector('input[type="password"]').value;
+            
+            btn.disabled = true;
+            btn.textContent = '로그인 중...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('kampai_token', data.token);
+                    localStorage.setItem('kampai_user', JSON.stringify(data.user));
+                    authToken = data.token;
+                    currentUser = data.user;
+                    
+                    closeLoginModal();
+                    
+                    // 선택한 플랜이 있고 유료면 결제로, 아니면 생성 페이지로
+                    const plan = selectedPlan || localStorage.getItem('kampai_selected_plan');
+                    if (plan && plan !== 'free') {
+                        alert(`환영합니다! ${PLAN_INFO[plan].name} 플랜 결제 페이지로 이동합니다.`);
+                        goToPayment(plan);
+                    } else {
+                        alert(`환영합니다, ${data.user.name || data.user.email}님! 🎉`);
+                        window.location.href = 'generate.html';
+                    }
+                } else {
+                    alert(data.error || '로그인에 실패했습니다');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('서버 연결에 실패했습니다');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '로그인';
+            }
+        });
+        
+        // 회원가입 폼
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const inputs = this.querySelectorAll('input');
+            const email = inputs[0].value;
+            const password = inputs[1].value;
+            const passwordConfirm = inputs[2].value;
+            
+            if (password !== passwordConfirm) {
+                alert('비밀번호가 일치하지 않습니다');
+                return;
+            }
+            
+            if (password.length < 8) {
+                alert('비밀번호는 8자 이상이어야 합니다');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = '가입 중...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('kampai_token', data.token);
+                    localStorage.setItem('kampai_user', JSON.stringify(data.user));
+                    authToken = data.token;
+                    currentUser = data.user;
+                    
+                    closeSignupModal();
+                    
+                    // 선택한 플랜이 있고 유료면 결제로, 아니면 생성 페이지로
+                    const plan = selectedPlan || localStorage.getItem('kampai_selected_plan');
+                    if (plan && plan !== 'free') {
+                        alert(`회원가입 완료! 🎉\n${PLAN_INFO[plan].name} 플랜 결제 페이지로 이동합니다.`);
+                        goToPayment(plan);
+                    } else {
+                        alert('회원가입이 완료되었습니다! 🎉\n매일 3장 무료 생성을 시작하세요!');
+                        window.location.href = 'generate.html';
+                    }
+                } else {
+                    alert(data.error || '회원가입에 실패했습니다');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('서버 연결에 실패했습니다');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '가입하기';
+            }
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href === '#login' || href === '#signup') return;
+                
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+                document.getElementById('mobileMenu').classList.add('hidden');
+            });
+        });
+        
+        // Navbar background on scroll
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-md');
+            } else {
+                nav.classList.remove('shadow-md');
+            }
+        });
+        
+        // Re-initialize icons
+        setTimeout(() => lucide.createIcons(), 100);
+    </script>
+</body>
+</html>

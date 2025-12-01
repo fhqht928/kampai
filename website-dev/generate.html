@@ -1,0 +1,2976 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kampai - AI 이미지 생성</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --secondary: #bf00ff;
+            --accent: #ff006e;
+            --success: #00ff88;
+            --dark: #0a0a0f;
+            --darker: #050508;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Rajdhani', sans-serif;
+            background: var(--darker);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* 배경 애니메이션 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(191, 0, 255, 0.1) 0%, transparent 50%);
+            animation: bgPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* 헤더 */
+        header {
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .logo-text:hover {
+            opacity: 0.9;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .auth-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+        }
+
+        .auth-status.guest {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .auth-status.logged-in {
+            color: var(--success);
+        }
+
+        .plan-badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .plan-badge.free {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .plan-badge.pro {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #fff;
+        }
+
+        .plan-badge.business {
+            background: linear-gradient(90deg, var(--accent), #ff8800);
+            color: #fff;
+        }
+
+        .login-link {
+            padding: 6px 14px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .login-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .logout-btn {
+            padding: 6px 14px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* 메인 레이아웃 */
+        .main-container {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            min-height: calc(100vh - 70px);
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 사이드바 */
+        .sidebar {
+            background: rgba(0,0,0,0.4);
+            border-right: 1px solid var(--glass-border);
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 70px);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        /* 섹션 */
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* 모드 탭 */
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .mode-tab:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+
+        .mode-tab.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(191, 0, 255, 0.15));
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .mode-tab .icon {
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* 이미지 업로드 영역 */
+        .upload-zone {
+            border: 2px dashed rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .upload-zone.active {
+            display: block;
+        }
+
+        /* Try-On 전용 업로드 영역 */
+        .tryon-zone {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            min-height: 150px;
+        }
+
+        /* 의상 캐릭터 전용 업로드 영역 */
+        .outfit-zone {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            min-height: 180px;
+            background: rgba(255,0,110,0.05);
+            border-color: rgba(255,0,110,0.3);
+        }
+
+        .outfit-zone:hover {
+            background: rgba(255,0,110,0.1);
+            border-color: rgba(255,0,110,0.5);
+        }
+
+        .outfit-preview {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .outfit-preview img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .tryon-preview {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .tryon-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .tryon-upload-box {
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--secondary);
+            background: rgba(191, 0, 255, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+
+        .upload-preview {
+            display: none;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .upload-preview.active {
+            display: block;
+        }
+
+        .upload-preview img {
+            width: 100%;
+            border-radius: 12px;
+            max-height: 200px;
+            object-fit: cover;
+        }
+
+        .upload-preview .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255,0,0,0.8);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* AI 모델 선택 */
+        .model-select-section {
+            margin-bottom: 20px;
+        }
+
+        .model-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .model-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .model-option:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .model-option.active {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .model-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        .model-info {
+            flex: 1;
+        }
+
+        .model-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .model-desc {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .model-option.active .model-name {
+            color: var(--primary);
+        }
+
+        /* 스타일 프리셋 */
+        .style-presets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .style-preset {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .style-preset::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        .style-preset:hover {
+            border-color: rgba(0, 240, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .style-preset.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .style-preset .emoji {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .style-preset .name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 프롬프트 빌더 */
+        .prompt-builder {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .builder-category {
+            margin-bottom: 12px;
+        }
+
+        .builder-category-title {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+
+        .builder-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .builder-tag {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .builder-tag:hover {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--primary);
+        }
+
+        .builder-tag.selected {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(191, 0, 255, 0.2));
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        /* 프롬프트 입력 */
+        .prompt-input-container {
+            position: relative;
+        }
+
+        .prompt-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            padding-right: 50px;
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+            transition: all 0.3s;
+            line-height: 1.5;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .prompt-input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+        .korean-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, var(--success), var(--primary));
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        /* AI 최적화 버튼 */
+        .optimize-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 240, 255, 0.2));
+            border: 2px solid var(--success);
+            border-radius: 10px;
+            color: var(--success);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .optimize-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 240, 255, 0.3));
+            transform: translateY(-2px);
+        }
+
+        .optimize-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 최적화된 프롬프트 표시 */
+        .optimized-prompt {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .optimized-prompt.active {
+            display: block;
+        }
+
+        .optimized-prompt .label {
+            font-size: 0.7rem;
+            color: var(--success);
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .optimized-prompt .text {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.4;
+        }
+
+        /* 사이즈 옵션 */
+        .size-presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .size-preset {
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .size-preset:hover {
+            border-color: rgba(0, 240, 255, 0.5);
+        }
+
+        .size-preset.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        /* 멀티 사이즈 토글 */
+        .multi-size-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(191, 0, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--secondary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+
+        .toggle-label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* 생성 버튼 */
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .main-content {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 결과 헤더 */
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-count {
+            background: rgba(0, 240, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        .model-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .model-badge {
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .status-dot.processing {
+            background: var(--primary);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        /* 프로그레스 */
+        .progress-section {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            background-size: 200% 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+            animation: progressGlow 2s linear infinite;
+        }
+
+        @keyframes progressGlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* 결과 그리드 */
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            flex: 1;
+        }
+
+        .result-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .result-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 240, 255, 0.2);
+        }
+
+        .result-image {
+            position: relative;
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .result-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .result-card:hover .result-image img {
+            transform: scale(1.05);
+        }
+
+        .result-image .placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .result-image .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-loader {
+            width: 60px;
+            height: 60px;
+            position: relative;
+        }
+
+        .ai-loader::before,
+        .ai-loader::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 3px solid transparent;
+            border-radius: 50%;
+        }
+
+        .ai-loader::before {
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        .ai-loader::after {
+            border-bottom-color: var(--secondary);
+            animation: spin 1s linear infinite reverse;
+            inset: 8px;
+        }
+
+        /* 이미지 오버레이 */
+        .image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 15px;
+        }
+
+        .result-card:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .overlay-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .overlay-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .overlay-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* 삭제 버튼 */
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 0, 100, 0.8);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .result-card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: #ff006e;
+            transform: scale(1.1);
+        }
+
+        /* 히스토리 섹션 */
+        .history-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .history-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-count {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .clear-history-btn {
+            padding: 8px 16px;
+            background: rgba(255, 0, 100, 0.2);
+            border: 1px solid rgba(255, 0, 100, 0.5);
+            border-radius: 8px;
+            color: #ff006e;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-history-btn:hover {
+            background: rgba(255, 0, 100, 0.4);
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* 결과 카드 정보 */
+        .result-info {
+            padding: 12px 15px;
+        }
+
+        .result-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .result-style {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Before/After 슬라이더 */
+        .compare-slider {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            overflow: hidden;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .compare-slider.active {
+            display: block;
+        }
+
+        .compare-slider img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .compare-slider .after-image {
+            clip-path: inset(0 50% 0 0);
+        }
+
+        .compare-slider .slider-handle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: #fff;
+            cursor: ew-resize;
+            transform: translateX(-50%);
+        }
+
+        .compare-slider .slider-handle::before {
+            content: '◀▶';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+
+        /* 토스트 */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            margin-top: 10px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--accent); }
+
+        /* 히든 파일 인풋 */
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- 헤더 -->
+    <header>
+        <div class="logo">
+            <a href="index.html" class="logo-icon">🍺</a>
+            <a href="index.html" class="logo-text">Kampai</a>
+        </div>
+        <div class="header-right">
+            <div id="authBadge" class="auth-badge">
+                <span class="auth-status guest">
+                    <span>👤</span>
+                    <span>로딩 중...</span>
+                </span>
+            </div>
+            <div class="model-info">
+                <div class="status-dot" id="statusDot"></div>
+                <span style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">FLUX.1-schnell</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <!-- 모드 선택 -->
+            <div class="mode-tabs">
+                <div class="mode-tab active" data-mode="create">
+                    <span class="icon">✨</span>
+                    <span>새로 생성</span>
+                </div>
+                <div class="mode-tab" data-mode="transform">
+                    <span class="icon">🔄</span>
+                    <span>이미지 편집</span>
+                </div>
+                <div class="mode-tab" data-mode="tryon">
+                    <span class="icon">👗</span>
+                    <span>AI 피팅</span>
+                </div>
+                <!-- 의상 캐릭터: 개발 모드에서만 표시 -->
+                <div class="mode-tab dev-only" data-mode="outfit" style="display: none;">
+                    <span class="icon">🎨</span>
+                    <span>의상 캐릭터</span>
+                </div>
+            </div>
+            
+            <!-- 모드 설명 -->
+            <div class="mode-description" id="modeDescription" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 10px; background: rgba(0,240,255,0.1); border: 1px solid rgba(0,240,255,0.2); font-size: 0.8rem; color: rgba(255,255,255,0.7);">
+            </div>
+
+            <!-- 이미지 업로드 (변환 모드) -->
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">이미지를 드래그하거나 클릭해서 업로드</div>
+                <div class="upload-hint" id="uploadHint" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 8px;"></div>
+            </div>
+            <div class="upload-preview" id="uploadPreview">
+                <img id="previewImg" src="" alt="Preview">
+                <button class="remove-btn" id="removeBtn">✕</button>
+            </div>
+            <input type="file" id="fileInput" accept="image/*">
+
+            <!-- AI 피팅 모드 전용 UI -->
+            <div class="tryon-section" id="tryonSection" style="display: none;">
+                <div class="tryon-uploads" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <!-- 캐릭터/사람 이미지 -->
+                    <div class="tryon-upload-box">
+                        <div class="tryon-label" style="font-size: 0.85rem; margin-bottom: 8px; color: var(--primary);">👤 캐릭터/사람 이미지</div>
+                        <div class="upload-zone tryon-zone" id="humanUploadZone" style="min-height: 150px; font-size: 0.75rem;">
+                            <div class="upload-icon">🧑</div>
+                            <div class="upload-text">캐릭터 이미지</div>
+                        </div>
+                        <div class="upload-preview tryon-preview" id="humanPreview" style="display: none;">
+                            <img id="humanPreviewImg" src="" alt="Human">
+                            <button class="remove-btn" onclick="removeHumanImage()">✕</button>
+                        </div>
+                        <input type="file" id="humanFileInput" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <!-- 옷 이미지 -->
+                    <div class="tryon-upload-box">
+                        <div class="tryon-label" style="font-size: 0.85rem; margin-bottom: 8px; color: var(--secondary);">👕 옷 이미지</div>
+                        <div class="upload-zone tryon-zone" id="garmentUploadZone" style="min-height: 150px; font-size: 0.75rem;">
+                            <div class="upload-icon">👗</div>
+                            <div class="upload-text">옷 사진</div>
+                        </div>
+                        <div class="upload-preview tryon-preview" id="garmentPreview" style="display: none;">
+                            <img id="garmentPreviewImg" src="" alt="Garment">
+                            <button class="remove-btn" onclick="removeGarmentImage()">✕</button>
+                        </div>
+                        <input type="file" id="garmentFileInput" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+                
+                <!-- 옷 카테고리 선택 -->
+                <div class="tryon-options" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button class="tag-btn active" data-category="upper_body">👕 상의</button>
+                    <button class="tag-btn" data-category="lower_body">👖 하의</button>
+                    <button class="tag-btn" data-category="dresses">👗 드레스</button>
+                </div>
+                
+                <!-- 옷 설명 입력 -->
+                <input type="text" id="garmentDescription" placeholder="옷 설명 (예: blue gradient hoodie, cute pink top)" 
+                       style="width: 100%; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; color: #fff; font-size: 0.9rem; margin-bottom: 10px;">
+            </div>
+
+            <!-- 의상 캐릭터 모드 전용 UI -->
+            <div class="outfit-section" id="outfitSection" style="display: none;">
+                <div class="outfit-upload-box" style="margin-bottom: 15px;">
+                    <div class="tryon-label" style="font-size: 0.85rem; margin-bottom: 8px; color: var(--accent);">👗 참조할 옷 이미지</div>
+                    <div class="upload-zone outfit-zone" id="outfitUploadZone" style="min-height: 180px;">
+                        <div class="upload-icon">👕</div>
+                        <div class="upload-text">옷 사진을 업로드하세요</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 8px;">AI가 이 옷을 입은 캐릭터를 생성합니다</div>
+                    </div>
+                    <div class="upload-preview outfit-preview" id="outfitPreview" style="display: none;">
+                        <img id="outfitPreviewImg" src="" alt="Outfit">
+                        <button class="remove-btn" onclick="removeOutfitImage()">✕</button>
+                    </div>
+                    <input type="file" id="outfitFileInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <!-- 캐릭터 프롬프트 입력 -->
+                <textarea id="outfitPrompt" class="prompt-input" placeholder="생성할 캐릭터를 설명하세요&#10;예: anime girl with long black hair, full body, standing pose&#10;예: cute boy character wearing this outfit, dynamic pose" 
+                          style="height: 80px; margin-bottom: 15px; resize: none;"></textarea>
+                
+                <!-- 출력 비율 선택 -->
+                <div class="outfit-options" style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                    <button class="tag-btn active" data-ratio="1:1">⬜ 1:1</button>
+                    <button class="tag-btn" data-ratio="3:4">📱 3:4</button>
+                    <button class="tag-btn" data-ratio="4:3">🖼️ 4:3</button>
+                    <button class="tag-btn" data-ratio="9:16">📲 9:16</button>
+                    <button class="tag-btn" data-ratio="16:9">🎬 16:9</button>
+                </div>
+            </div>
+
+            <!-- AI 모델 선택 (Pro/Business만) -->
+            <div class="section model-select-section" id="modelSelectSection" style="display: none;">
+                <div class="section-title">🤖 AI 모델 선택</div>
+                <div class="model-options" id="modelOptions">
+                    <div class="model-option active" data-model="qwen-image">
+                        <div class="model-icon">🔤</div>
+                        <div class="model-info">
+                            <div class="model-name">Qwen-Image</div>
+                            <div class="model-desc">텍스트 렌더링 특화 • 한글 지원</div>
+                        </div>
+                    </div>
+                    <div class="model-option" data-model="flux-2-pro">
+                        <div class="model-icon">🌟</div>
+                        <div class="model-info">
+                            <div class="model-name">FLUX 2 Pro</div>
+                            <div class="model-desc">이미지 편집 • 고품질 • 최신</div>
+                        </div>
+                    </div>
+                    <div class="model-option" data-model="flux-1.1-pro-ultra">
+                        <div class="model-icon">🎨</div>
+                        <div class="model-info">
+                            <div class="model-name">FLUX Pro Ultra</div>
+                            <div class="model-desc">4K 초고해상도 • 최고 품질</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 스타일 프리셋 -->
+            <div class="section">
+                <div class="section-title">🎭 스타일 프리셋</div>
+                <div class="style-presets">
+                    <div class="style-preset" data-style="none" data-prompt="">
+                        <span class="emoji">🎯</span>
+                        <span class="name">기본</span>
+                    </div>
+                    <div class="style-preset" data-style="realistic" data-prompt="photorealistic, ultra realistic, 8k uhd, dslr, professional photography, sharp focus, natural lighting">
+                        <span class="emoji">📸</span>
+                        <span class="name">실사</span>
+                    </div>
+                    <div class="style-preset" data-style="3d" data-prompt="3d render, octane render, unreal engine 5, cinema 4d, smooth, polished, ray tracing">
+                        <span class="emoji">🎮</span>
+                        <span class="name">3D렌더</span>
+                    </div>
+                    <div class="style-preset" data-style="digitalart" data-prompt="digital art, digital painting, artstation trending, detailed illustration, vibrant colors">
+                        <span class="emoji">🖌️</span>
+                        <span class="name">디지털아트</span>
+                    </div>
+                    <div class="style-preset" data-style="concept" data-prompt="concept art, illustration, matte painting, detailed, cinematic, epic composition">
+                        <span class="emoji">🎬</span>
+                        <span class="name">컨셉아트</span>
+                    </div>
+                    <div class="style-preset" data-style="cyberpunk" data-prompt="cyberpunk, neon lights, futuristic city, dark atmosphere, rain, holographic, sci-fi, blade runner">
+                        <span class="emoji">🌃</span>
+                        <span class="name">사이버펑크</span>
+                    </div>
+                    <div class="style-preset" data-style="fantasy" data-prompt="fantasy art, magical, epic, ethereal lighting, mystical atmosphere, detailed">
+                        <span class="emoji">🧙</span>
+                        <span class="name">판타지</span>
+                    </div>
+                    <div class="style-preset" data-style="anime" data-prompt="anime style, anime artwork, japanese animation, cel shading, vibrant, detailed anime">
+                        <span class="emoji">🇯🇵</span>
+                        <span class="name">애니메</span>
+                    </div>
+                    <div class="style-preset" data-style="oilpaint" data-prompt="oil painting, classical art, renaissance style, visible brush strokes, rich textures, masterpiece">
+                        <span class="emoji">🖼️</span>
+                        <span class="name">유화</span>
+                    </div>
+                    <div class="style-preset" data-style="minimal" data-prompt="minimalist, clean design, simple composition, negative space, modern, elegant">
+                        <span class="emoji">⬜</span>
+                        <span class="name">미니멀</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 프롬프트 빌더 -->
+            <div class="section">
+                <div class="section-title">🏗️ 프롬프트 빌더</div>
+                <div class="prompt-builder">
+                    <div class="builder-category">
+                        <div class="builder-category-title">📷 구도 & 앵글</div>
+                        <div class="builder-tags">
+                            <span class="builder-tag" data-tag="close-up shot">클로즈업</span>
+                            <span class="builder-tag" data-tag="wide angle">와이드</span>
+                            <span class="builder-tag" data-tag="bird's eye view">탑뷰</span>
+                            <span class="builder-tag" data-tag="low angle">로우앵글</span>
+                            <span class="builder-tag" data-tag="portrait">인물샷</span>
+                        </div>
+                    </div>
+                    <div class="builder-category">
+                        <div class="builder-category-title">💡 조명</div>
+                        <div class="builder-tags">
+                            <span class="builder-tag" data-tag="studio lighting">스튜디오</span>
+                            <span class="builder-tag" data-tag="natural light">자연광</span>
+                            <span class="builder-tag" data-tag="golden hour">골든아워</span>
+                            <span class="builder-tag" data-tag="neon lights">네온</span>
+                            <span class="builder-tag" data-tag="dramatic lighting">드라마틱</span>
+                        </div>
+                    </div>
+                    <div class="builder-category">
+                        <div class="builder-category-title">🎨 분위기</div>
+                        <div class="builder-tags">
+                            <span class="builder-tag" data-tag="moody, atmospheric">무디</span>
+                            <span class="builder-tag" data-tag="bright, cheerful">밝은</span>
+                            <span class="builder-tag" data-tag="dark, mysterious">어두운</span>
+                            <span class="builder-tag" data-tag="dreamy, ethereal">몽환적</span>
+                            <span class="builder-tag" data-tag="vintage, retro">빈티지</span>
+                        </div>
+                    </div>
+                    <div class="builder-category">
+                        <div class="builder-category-title">✨ 퀄리티</div>
+                        <div class="builder-tags">
+                            <span class="builder-tag selected" data-tag="high quality">고퀄리티</span>
+                            <span class="builder-tag" data-tag="ultra detailed">초고화질</span>
+                            <span class="builder-tag" data-tag="8k resolution">8K</span>
+                            <span class="builder-tag" data-tag="masterpiece">걸작</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 프롬프트 입력 -->
+            <div class="section">
+                <div class="section-title">💬 프롬프트 (한글 OK!)</div>
+                <div class="prompt-input-container">
+                    <textarea class="prompt-input" id="promptInput" placeholder="원하는 이미지를 한글로 설명하세요...&#10;&#10;예: 해질녘 바다 위의 등대, 파도가 치는 모습"></textarea>
+                    <div class="korean-badge">🇰🇷 한글 지원</div>
+                </div>
+                
+                <button class="optimize-btn" id="optimizeBtn">
+                    <span>🧠</span>
+                    <span>AI 프롬프트 최적화 (Llama 3.1)</span>
+                </button>
+
+                <div class="optimized-prompt" id="optimizedPrompt">
+                    <div class="label">✨ AI 최적화 프롬프트 (Llama 3.1)</div>
+                    <div class="text" id="optimizedText"></div>
+                </div>
+            </div>
+
+            <!-- 사이즈 선택 -->
+            <div class="section">
+                <div class="section-title">📐 이미지 크기</div>
+                <div class="size-presets">
+                    <button class="size-preset active" data-width="1024" data-height="1024">1:1</button>
+                    <button class="size-preset" data-width="1280" data-height="720">16:9</button>
+                    <button class="size-preset" data-width="720" data-height="1280">9:16</button>
+                    <button class="size-preset" data-width="1536" data-height="640">배너</button>
+                </div>
+                <div class="multi-size-toggle">
+                    <div class="toggle-switch" id="multiSizeToggle"></div>
+                    <span class="toggle-label">한 번에 모든 사이즈 생성</span>
+                </div>
+            </div>
+
+            <!-- 생성 버튼 -->
+            <button class="generate-btn" id="generateBtn">
+                <span>⚡</span>
+                <span>이미지 생성</span>
+            </button>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <div class="result-header">
+                <div class="result-title">
+                    🖼️ 생성 결과
+                    <span class="result-count" id="resultCount">0장</span>
+                </div>
+                <div class="model-badge" id="modelBadge">FLUX.1-schnell</div>
+            </div>
+
+            <!-- 프로그레스 -->
+            <div class="progress-section" id="progressSection">
+                <div class="progress-info">
+                    <span id="progressLabel">이미지 생성 준비 중...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 결과 그리드 -->
+            <div class="result-grid" id="resultGrid">
+                <div class="result-card">
+                    <div class="result-image">
+                        <div class="placeholder">
+                            <div class="placeholder-icon">🎨</div>
+                            <div>이미지를 생성해주세요</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 히스토리 섹션 -->
+            <div class="history-section" id="historySection">
+                <div class="history-header">
+                    <div class="history-title">
+                        📁 저장된 이미지
+                        <span class="history-count" id="historyCount">0/20</span>
+                    </div>
+                    <button class="clear-history-btn" onclick="clearHistory()">🗑️ 전체 삭제</button>
+                </div>
+                <div class="result-grid" id="historyGrid">
+                    <div class="history-empty">저장된 이미지가 없습니다</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 토스트 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        const MAX_HISTORY = 20;  // 최대 저장 이미지 수
+        const IS_DEV_MODE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+        // 개발 모드에서만 의상 캐릭터 탭 표시
+        if (IS_DEV_MODE) {
+            document.querySelectorAll('.dev-only').forEach(el => {
+                el.style.display = '';
+            });
+        }
+
+        // 인증 상태 관리
+        let authState = {
+            isLoggedIn: false,
+            user: null,
+            subscription: null,
+            remainingGenerations: 0
+        };
+
+        // 상태 관리
+        let state = {
+            mode: 'create',
+            style: 'none',
+            stylePrompt: '',
+            selectedTags: ['high quality'],
+            width: 1024,
+            height: 1024,
+            multiSize: false,
+            uploadedImage: null,
+            optimizedPrompt: '',
+            images: [],
+            selectedModel: null  // 선택된 AI 모델 (Pro/Business)
+        };
+
+        // ============================================
+        // 히스토리 관리 (localStorage)
+        // ============================================
+        
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem('kampai_history') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(history) {
+            localStorage.setItem('kampai_history', JSON.stringify(history));
+        }
+
+        function addToHistory(imageData) {
+            const history = getHistory();
+            
+            // 새 이미지 추가 (앞에 추가)
+            history.unshift({
+                id: Date.now(),
+                url: imageData.url,
+                prompt: imageData.prompt || '',
+                model: imageData.model || 'unknown',
+                size: imageData.size || '1024x1024',
+                createdAt: new Date().toISOString()
+            });
+            
+            // 최대 개수 초과 시 오래된 것 제거
+            while (history.length > MAX_HISTORY) {
+                history.pop();
+            }
+            
+            saveHistory(history);
+            renderHistory();
+        }
+
+        function removeFromHistory(id) {
+            const history = getHistory().filter(item => item.id !== id);
+            saveHistory(history);
+            renderHistory();
+            showToast('이미지가 삭제되었습니다', 'success');
+        }
+
+        function clearHistory() {
+            if (confirm('저장된 모든 이미지를 삭제하시겠습니까?')) {
+                saveHistory([]);
+                renderHistory();
+                showToast('모든 이미지가 삭제되었습니다', 'success');
+            }
+        }
+
+        function renderHistory() {
+            const history = getHistory();
+            const historyGrid = document.getElementById('historyGrid');
+            const historyCount = document.getElementById('historyCount');
+            
+            historyCount.textContent = `${history.length}/${MAX_HISTORY}`;
+            
+            if (history.length === 0) {
+                historyGrid.innerHTML = '<div class="history-empty">저장된 이미지가 없습니다</div>';
+                return;
+            }
+            
+            historyGrid.innerHTML = history.map(item => `
+                <div class="result-card" data-id="${item.id}">
+                    <div class="result-image">
+                        <button class="delete-btn" onclick="removeFromHistory(${item.id})" title="삭제">✕</button>
+                        <img src="${item.url}" alt="Generated" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><div class=\\'placeholder-icon\\'>⚠️</div><div>이미지 만료</div></div>'">
+                        <div class="image-overlay">
+                            <div class="overlay-actions">
+                                <button class="overlay-btn" onclick="downloadImage('${item.url}', 'kampai_${item.id}.png')">
+                                    ⬇ 다운로드
+                                </button>
+                                <button class="overlay-btn" onclick="window.open('${item.url}', '_blank')">
+                                    🔍 확대
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-info" style="padding: 10px; font-size: 0.75rem; color: rgba(255,255,255,0.5);">
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.prompt}">
+                            ${item.prompt ? item.prompt.substring(0, 50) + (item.prompt.length > 50 ? '...' : '') : '프롬프트 없음'}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                            <span>${item.model}</span>
+                            <span>${new Date(item.createdAt).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 인증 상태 확인
+        async function checkAuth() {
+            const token = localStorage.getItem('kampai_token');
+            if (!token) {
+                authState.isLoggedIn = false;
+                authState.user = null;
+                updateAuthUI();
+                return false;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authState.isLoggedIn = true;
+                    authState.user = data.user;
+                    
+                    // 구독 정보 가져오기
+                    await fetchSubscription(token);
+                    updateAuthUI();
+                    return true;
+                } else {
+                    localStorage.removeItem('kampai_token');
+                    authState.isLoggedIn = false;
+                    updateAuthUI();
+                    return false;
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                authState.isLoggedIn = false;
+                updateAuthUI();
+                return false;
+            }
+        }
+
+        // 구독 정보 가져오기
+        async function fetchSubscription(token) {
+            try {
+                const response = await fetch(`${API_URL}/api/subscription`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authState.subscription = data;
+                    authState.remainingGenerations = data.remaining_today;
+                    
+                    // 모델 선택 UI 업데이트
+                    await updateModelOptions();
+                }
+            } catch (error) {
+                console.error('Subscription fetch failed:', error);
+            }
+        }
+
+        // 모델 선택 옵션 업데이트
+        async function updateModelOptions() {
+            const plan = authState.subscription?.plan || 'free';
+            const modelSection = document.getElementById('modelSelectSection');
+            const modelBadge = document.getElementById('modelBadge');
+            
+            // Pro/Business만 모델 선택 가능
+            if (plan === 'pro' || plan === 'business') {
+                modelSection.style.display = 'block';
+                
+                // 기본 모델 설정
+                if (!state.selectedModel) {
+                    state.selectedModel = 'qwen-image';
+                }
+                updateModelBadge();
+            } else {
+                modelSection.style.display = 'none';
+                state.selectedModel = 'flux-schnell';
+                modelBadge.textContent = 'FLUX.1-schnell';
+            }
+        }
+
+        // 모델 배지 업데이트
+        function updateModelBadge() {
+            const modelBadge = document.getElementById('modelBadge');
+            const modelNames = {
+                'flux-schnell': 'FLUX.1 Schnell',
+                'qwen-image': 'Qwen-Image',
+                'flux-2-pro': 'FLUX 2 Pro',
+                'flux-1.1-pro-ultra': 'FLUX Pro Ultra'
+            };
+            modelBadge.textContent = modelNames[state.selectedModel] || state.selectedModel;
+        }
+
+        // 모델 선택 이벤트
+        document.querySelectorAll('.model-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                state.selectedModel = option.dataset.model;
+                updateModelBadge();
+                console.log('🤖 선택된 모델:', state.selectedModel);
+            });
+        });
+
+        // 사용량 기록
+        async function recordUsage() {
+            const token = localStorage.getItem('kampai_token');
+            if (!token) return;
+
+            try {
+                await fetch(`${API_URL}/api/usage/record`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'generate' })
+                });
+                
+                // 남은 횟수 업데이트
+                if (authState.subscription?.plan === 'free' && authState.remainingGenerations > 0) {
+                    authState.remainingGenerations--;
+                    updateAuthUI();
+                }
+            } catch (error) {
+                console.error('Usage record failed:', error);
+            }
+        }
+
+        // 인증 UI 업데이트
+        function updateAuthUI() {
+            const authBadge = document.getElementById('authBadge');
+            
+            if (!authState.isLoggedIn) {
+                authBadge.innerHTML = `
+                    <span class="auth-status guest">
+                        <span>👤</span>
+                        <span>비로그인 (3회 무료)</span>
+                    </span>
+                    <a href="index.html#" onclick="location.href='index.html'; return false;" class="login-link">로그인</a>
+                `;
+            } else {
+                const planNames = { 'free': '무료', 'pro': 'Pro', 'business': 'Business' };
+                const plan = authState.subscription?.plan || 'free';
+                const planName = planNames[plan] || plan;
+                
+                let usageText = '';
+                if (plan === 'free') {
+                    usageText = ` (${authState.remainingGenerations}/3 남음)`;
+                } else if (plan === 'pro' || plan === 'business') {
+                    usageText = ' (무제한)';
+                }
+                
+                authBadge.innerHTML = `
+                    <span class="auth-status logged-in">
+                        <span>✨</span>
+                        <span>${authState.user?.email || '사용자'}</span>
+                        <span class="plan-badge ${plan}">${planName}${usageText}</span>
+                    </span>
+                    <button onclick="logout()" class="logout-btn">로그아웃</button>
+                `;
+            }
+        }
+
+        // 로그아웃
+        function logout() {
+            localStorage.removeItem('kampai_token');
+            authState.isLoggedIn = false;
+            authState.user = null;
+            authState.subscription = null;
+            updateAuthUI();
+            showToast('로그아웃되었습니다', 'success');
+        }
+
+        // 생성 가능 여부 체크
+        function canGenerate() {
+            // 비로그인 사용자도 3회까지 허용 (세션 기반으로 처리)
+            if (!authState.isLoggedIn) {
+                const guestCount = parseInt(localStorage.getItem('kampai_guest_count') || '0');
+                if (guestCount >= 3) {
+                    showToast('무료 체험이 끝났습니다. 로그인하여 더 많은 이미지를 생성하세요!', 'error');
+                    setTimeout(() => {
+                        location.href = 'index.html';
+                    }, 2000);
+                    return false;
+                }
+                return true;
+            }
+
+            // 로그인 사용자
+            const plan = authState.subscription?.plan || 'free';
+            
+            if (plan === 'pro' || plan === 'business') {
+                return true;  // 무제한
+            }
+            
+            if (plan === 'free' && authState.remainingGenerations <= 0) {
+                showToast('오늘의 무료 생성 횟수를 모두 사용했습니다. Pro로 업그레이드하세요!', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // 게스트 사용량 기록
+        function recordGuestUsage() {
+            const guestCount = parseInt(localStorage.getItem('kampai_guest_count') || '0');
+            localStorage.setItem('kampai_guest_count', (guestCount + 1).toString());
+        }
+
+        // 페이지 로드 시 인증 체크 및 히스토리 렌더링
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            renderHistory();  // 저장된 이미지 히스토리 표시
+            initTryOnUpload();  // Try-On 업로드 초기화
+        });
+        
+        // Try-On 업로드 초기화 함수
+        function initTryOnUpload() {
+            // 캐릭터 이미지 업로드
+            const humanUploadZone = document.getElementById('humanUploadZone');
+            const humanFileInput = document.getElementById('humanFileInput');
+            
+            if (humanUploadZone && humanFileInput) {
+                humanUploadZone.addEventListener('click', () => {
+                    humanFileInput.click();
+                });
+                
+                humanFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            tryonState.humanImage = ev.target.result;
+                            document.getElementById('humanPreviewImg').src = ev.target.result;
+                            humanUploadZone.style.display = 'none';
+                            document.getElementById('humanPreview').style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            // 옷 이미지 업로드
+            const garmentUploadZone = document.getElementById('garmentUploadZone');
+            const garmentFileInput = document.getElementById('garmentFileInput');
+            
+            if (garmentUploadZone && garmentFileInput) {
+                garmentUploadZone.addEventListener('click', () => {
+                    garmentFileInput.click();
+                });
+                
+                garmentFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            tryonState.garmentImage = ev.target.result;
+                            document.getElementById('garmentPreviewImg').src = ev.target.result;
+                            garmentUploadZone.style.display = 'none';
+                            document.getElementById('garmentPreview').style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            console.log('✅ Try-On 업로드 초기화 완료');
+        }
+        
+        // 캐릭터 이미지 제거
+        function removeHumanImage() {
+            tryonState.humanImage = null;
+            document.getElementById('humanUploadZone').style.display = 'flex';
+            document.getElementById('humanPreview').style.display = 'none';
+            document.getElementById('humanFileInput').value = '';
+        }
+        
+        // 옷 이미지 제거
+        function removeGarmentImage() {
+            tryonState.garmentImage = null;
+            document.getElementById('garmentUploadZone').style.display = 'flex';
+            document.getElementById('garmentPreview').style.display = 'none';
+            document.getElementById('garmentFileInput').value = '';
+        }
+
+        // DOM 요소
+        const promptInput = document.getElementById('promptInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const optimizeBtn = document.getElementById('optimizeBtn');
+        const resultGrid = document.getElementById('resultGrid');
+        const progressSection = document.getElementById('progressSection');
+        const progressFill = document.getElementById('progressFill');
+        const progressLabel = document.getElementById('progressLabel');
+        const progressPercent = document.getElementById('progressPercent');
+        const statusDot = document.getElementById('statusDot');
+        const resultCount = document.getElementById('resultCount');
+        const optimizedPromptEl = document.getElementById('optimizedPrompt');
+        const optimizedText = document.getElementById('optimizedText');
+        const uploadZone = document.getElementById('uploadZone');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const previewImg = document.getElementById('previewImg');
+        const fileInput = document.getElementById('fileInput');
+
+        // 한글 → 영어 프롬프트 변환 사전 (대폭 확장)
+        const koreanToEnglish = {
+            // 사람/인물
+            '남자': 'man', '여자': 'woman', '사람': 'person', '아이': 'child', '소녀': 'girl', 
+            '소년': 'boy', '노인': 'elderly person', '청년': 'young man', '아기': 'baby',
+            '학생': 'student', '회사원': 'office worker', '요리사': 'chef', '의사': 'doctor',
+            
+            // 동물
+            '고양이': 'cat', '강아지': 'dog', '개': 'dog', '새': 'bird', '물고기': 'fish',
+            '토끼': 'rabbit', '곰': 'bear', '호랑이': 'tiger', '사자': 'lion', '말': 'horse',
+            '코끼리': 'elephant', '펭귄': 'penguin', '용': 'dragon', '공룡': 'dinosaur',
+            
+            // 음식 (대폭 확장!)
+            '짜장면': 'jajangmyeon, black bean noodles, korean chinese noodles',
+            '짬뽕': 'jjamppong, spicy seafood noodles',
+            '라면': 'ramen, noodle soup', '국수': 'noodles', '면': 'noodles',
+            '밥': 'rice', '김치': 'kimchi', '불고기': 'bulgogi', '비빔밥': 'bibimbap',
+            '삼겹살': 'samgyeopsal, korean bbq pork belly', '치킨': 'fried chicken',
+            '떡볶이': 'tteokbokki, spicy rice cakes', '김밥': 'kimbap, korean rice roll',
+            '된장찌개': 'doenjang jjigae, soybean paste stew',
+            '삼계탕': 'samgyetang, chicken ginseng soup',
+            '냉면': 'naengmyeon, cold noodles', '족발': 'jokbal, pig feet',
+            '음식': 'food', '과일': 'fruit', '사과': 'apple', '커피': 'coffee', 
+            '케이크': 'cake', '빵': 'bread', '피자': 'pizza', '햄버거': 'hamburger', 
+            '초밥': 'sushi', '스테이크': 'steak', '파스타': 'pasta', '샐러드': 'salad',
+            '아이스크림': 'ice cream', '초콜릿': 'chocolate', '쿠키': 'cookie',
+            '맥주': 'beer', '와인': 'wine', '소주': 'soju', '차': 'tea',
+            
+            // 동작/행위 (핵심!)
+            '먹고 있는': 'eating', '먹는': 'eating', '먹다': 'eating',
+            '마시고 있는': 'drinking', '마시는': 'drinking', '마시다': 'drinking',
+            '앉아 있는': 'sitting', '앉아있는': 'sitting', '앉은': 'sitting',
+            '서 있는': 'standing', '서있는': 'standing', '선': 'standing',
+            '걷고 있는': 'walking', '걷는': 'walking', '걷다': 'walking',
+            '뛰고 있는': 'running', '뛰는': 'running', '달리는': 'running',
+            '자고 있는': 'sleeping', '자는': 'sleeping', '잠자는': 'sleeping',
+            '웃고 있는': 'smiling', '웃는': 'smiling', '미소짓는': 'smiling',
+            '울고 있는': 'crying', '우는': 'crying',
+            '노래하는': 'singing', '춤추는': 'dancing', '요리하는': 'cooking',
+            '읽고 있는': 'reading', '읽는': 'reading', '책 읽는': 'reading a book',
+            '일하는': 'working', '공부하는': 'studying', '그리는': 'drawing',
+            '들고 있는': 'holding', '들고있는': 'holding', '잡고 있는': 'holding',
+            '보고 있는': 'looking at', '바라보는': 'looking at', '쳐다보는': 'looking at',
+            '놀고 있는': 'playing', '노는': 'playing',
+            
+            // 장소
+            '식당': 'restaurant', '중국집': 'chinese restaurant', '한식당': 'korean restaurant',
+            '집': 'house, home', '방': 'room', '거실': 'living room', '침실': 'bedroom', 
+            '주방': 'kitchen', '화장실': 'bathroom', '사무실': 'office',
+            '학교': 'school', '병원': 'hospital', '공원': 'park', '정원': 'garden',
+            '카페': 'cafe', '바': 'bar', '클럽': 'club', '마트': 'supermarket',
+            '해변': 'beach', '산': 'mountain', '숲': 'forest', '강': 'river', '호수': 'lake',
+            '바다': 'sea, ocean', '하늘': 'sky', '도시': 'city', '거리': 'street',
+            '시골': 'countryside', '마을': 'village', '섬': 'island',
+            
+            // 사물
+            '젓가락': 'chopsticks', '숟가락': 'spoon', '포크': 'fork', '나이프': 'knife',
+            '그릇': 'bowl', '접시': 'plate', '컵': 'cup', '잔': 'glass',
+            '테이블': 'table', '식탁': 'dining table', '의자': 'chair',
+            '책': 'book', '컴퓨터': 'computer', '핸드폰': 'smartphone', '노트북': 'laptop',
+            '자동차': 'car', '버스': 'bus', '지하철': 'subway', '비행기': 'airplane',
+            '꽃': 'flower', '나무': 'tree', '풀': 'grass', '잎': 'leaf',
+            
+            // 형용사
+            '맛있는': 'delicious', '뜨거운': 'hot, steaming', '차가운': 'cold',
+            '아름다운': 'beautiful', '예쁜': 'pretty', '귀여운': 'cute', '멋진': 'cool, stylish',
+            '화려한': 'gorgeous, colorful', '심플한': 'simple', '모던한': 'modern',
+            '어두운': 'dark', '밝은': 'bright', '따뜻한': 'warm', '부드러운': 'soft',
+            '큰': 'big, large', '작은': 'small', '거대한': 'huge, giant',
+            '행복한': 'happy', '슬픈': 'sad', '화난': 'angry', '즐거운': 'joyful',
+            '신비로운': 'mystical', '환상적인': 'fantastic', '마법의': 'magical',
+            
+            // 시간/날씨
+            '아침': 'morning', '점심': 'noon, lunch time', '저녁': 'evening', '밤': 'night',
+            '새벽': 'dawn', '황혼': 'twilight', '일몰': 'sunset', '일출': 'sunrise',
+            '비오는': 'rainy', '눈오는': 'snowy', '맑은': 'sunny, clear', '흐린': 'cloudy',
+            
+            // 스타일
+            '사진': 'photograph', '그림': 'painting', '일러스트': 'illustration', 
+            '스케치': 'sketch', '만화': 'cartoon', '애니메이션': 'animation',
+            
+            // 분위기
+            '평화로운': 'peaceful', '고요한': 'serene', '활기찬': 'vibrant',
+            '로맨틱한': 'romantic', '드라마틱한': 'dramatic', '편안한': 'cozy',
+            
+            // 조사/접속사 제거용
+            '을': '', '를': '', '이': '', '가': '', '은': '', '는': '',
+            '에서': '', '에': '', '의': '', '과': '', '와': '', '으로': '', '로': ''
+        };
+        
+        // 한글 포함 여부 체크
+        function containsKorean(text) {
+            return /[가-힣]/.test(text);
+        }
+
+        // 한글 프롬프트 최적화 (개선된 버전)
+        function optimizeKoreanPrompt(koreanText) {
+            let result = koreanText;
+            
+            // 긴 표현부터 먼저 변환 (순서 중요!)
+            const sortedEntries = Object.entries(koreanToEnglish).sort((a, b) => b[0].length - a[0].length);
+            
+            for (const [korean, english] of sortedEntries) {
+                if (korean && english) {  // 빈 값 제외
+                    const regex = new RegExp(korean, 'g');
+                    result = result.replace(regex, english);
+                }
+            }
+            
+            // 남은 한글 문자 제거 (변환 안 된 것들)
+            result = result.replace(/[가-힣]+/g, '');
+            
+            // 중복 공백, 쉼표 정리
+            result = result.replace(/,\s*,/g, ',');
+            result = result.replace(/\s+/g, ' ');
+            result = result.replace(/,\s*$/g, '');
+            result = result.replace(/^\s*,/g, '');
+            result = result.trim();
+            
+            // 선택된 스타일 프리셋 추가
+            if (state.stylePrompt) {
+                result = result + ', ' + state.stylePrompt;
+            }
+            
+            // 선택된 태그 추가
+            if (state.selectedTags.length > 0) {
+                result = result + ', ' + state.selectedTags.join(', ');
+            }
+            
+            // 기본 품질 태그가 없으면 추가
+            if (!result.toLowerCase().includes('quality') && !result.toLowerCase().includes('detailed')) {
+                result += ', high quality, detailed';
+            }
+            
+            return result;
+        }
+
+        // 모드 탭 전환
+        document.querySelectorAll('.mode-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                state.mode = tab.dataset.mode;
+                
+                // 업로드 영역 표시/숨김 (transform, reference 모드에서만)
+                const showUpload = state.mode === 'transform' || state.mode === 'reference';
+                uploadZone.classList.toggle('active', showUpload);
+                
+                if (state.mode === 'create') {
+                    uploadPreview.classList.remove('active');
+                    state.uploadedImage = null;
+                    promptInput.placeholder = '원하는 이미지를 한글로 설명하세요...\n\n예: 해질녘 바다 위의 등대, 파도가 치는 모습';
+                    document.getElementById('modeDescription').style.display = 'none';
+                    // Pro/Business면 모델 선택 표시
+                    if (authState.isLoggedIn && ['pro', 'business'].includes(authState.user?.plan)) {
+                        document.getElementById('modelSelectSection').style.display = 'block';
+                    }
+                }
+                
+                // 이미지 편집 모드
+                if (state.mode === 'transform') {
+                    promptInput.placeholder = '이미지를 어떻게 변경할지 설명하세요...\n\n예: 배경을 우주로 바꿔줘\n예: 사람의 옷을 빨간색으로 바꿔줘\n예: 애니메이션 스타일로 변환해줘';
+                    document.getElementById('modeDescription').style.display = 'block';
+                    document.getElementById('modeDescription').innerHTML = '🔄 <b>이미지 편집</b>: 업로드한 이미지를 직접 수정<br>배경 변경, 스타일 변환, 색상 수정 등';
+                    document.getElementById('uploadHint').textContent = '편집할 이미지를 업로드하세요';
+                    showToast('이미지를 업로드하고 변경할 내용을 입력하세요. (Pro/Business 전용)', 'info');
+                    selectFlux2Pro();
+                    // Pro/Business면 모델 선택 표시
+                    if (authState.isLoggedIn && ['pro', 'business'].includes(authState.user?.plan)) {
+                        document.getElementById('modelSelectSection').style.display = 'block';
+                    }
+                }
+                
+                // AI 피팅 모드 (Virtual Try-On)
+                if (state.mode === 'tryon') {
+                    document.getElementById('uploadZone').style.display = 'none';
+                    document.getElementById('uploadPreview').style.display = 'none';
+                    document.getElementById('tryonSection').style.display = 'block';
+                    document.getElementById('outfitSection').style.display = 'none';
+                    document.getElementById('modelSelectSection').style.display = 'none';  // 모델 선택 숨김
+                    promptInput.style.display = 'none';  // 프롬프트 불필요
+                    document.getElementById('modeDescription').style.display = 'block';
+                    document.getElementById('modeDescription').innerHTML = '👗 <b>AI 피팅 (Virtual Try-On)</b>: 캐릭터/사람 이미지에 옷을 입힙니다<br>IDM-VTON 모델 사용 • Pro/Business 전용 • $0.034/회';
+                    showToast('캐릭터 이미지와 옷 이미지를 각각 업로드하세요. (Pro/Business 전용)', 'info');
+                } 
+                // 의상 캐릭터 모드 (FLUX Kontext)
+                else if (state.mode === 'outfit') {
+                    document.getElementById('uploadZone').style.display = 'none';
+                    document.getElementById('uploadPreview').style.display = 'none';
+                    document.getElementById('tryonSection').style.display = 'none';
+                    document.getElementById('outfitSection').style.display = 'block';
+                    document.getElementById('modelSelectSection').style.display = 'none';  // 모델 선택 숨김
+                    promptInput.style.display = 'none';  // 별도 프롬프트 사용
+                    document.getElementById('modeDescription').style.display = 'block';
+                    document.getElementById('modeDescription').innerHTML = '🎨 <b>의상 캐릭터</b>: 옷 사진만 올리면 AI가 그 옷을 입은 캐릭터를 생성!<br>FLUX Kontext 모델 • Pro/Business 전용 • $0.025/회';
+                    showToast('옷 사진을 업로드하고 원하는 캐릭터를 설명하세요! (Pro/Business 전용)', 'info');
+                }
+                else {
+                    document.getElementById('tryonSection').style.display = 'none';
+                    document.getElementById('outfitSection').style.display = 'none';
+                    promptInput.style.display = 'block';
+                }
+            });
+        });
+        
+        // Try-On 상태 관리
+        let tryonState = {
+            humanImage: null,
+            garmentImage: null,
+            category: 'upper_body'
+        };
+        
+        // 의상 캐릭터 상태 관리
+        let outfitState = {
+            outfitImage: null,
+            aspectRatio: '1:1'
+        };
+        
+        // Try-On 카테고리 선택
+        document.querySelectorAll('.tryon-options .tag-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tryon-options .tag-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                tryonState.category = btn.dataset.category;
+            });
+        });
+        
+        // 의상 캐릭터 비율 선택
+        document.querySelectorAll('.outfit-options .tag-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.outfit-options .tag-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                outfitState.aspectRatio = btn.dataset.ratio;
+            });
+        });
+        
+        // 의상 캐릭터 이미지 업로드 핸들러
+        const outfitUploadZone = document.getElementById('outfitUploadZone');
+        const outfitFileInput = document.getElementById('outfitFileInput');
+        const outfitPreview = document.getElementById('outfitPreview');
+        const outfitPreviewImg = document.getElementById('outfitPreviewImg');
+        
+        if (outfitUploadZone) {
+            outfitUploadZone.addEventListener('click', () => outfitFileInput.click());
+            outfitUploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                outfitUploadZone.classList.add('dragover');
+            });
+            outfitUploadZone.addEventListener('dragleave', () => outfitUploadZone.classList.remove('dragover'));
+            outfitUploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                outfitUploadZone.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    handleOutfitFile(file);
+                }
+            });
+        }
+        
+        if (outfitFileInput) {
+            outfitFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) handleOutfitFile(file);
+            });
+        }
+        
+        function handleOutfitFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                outfitState.outfitImage = e.target.result;
+                outfitPreviewImg.src = e.target.result;
+                outfitUploadZone.style.display = 'none';
+                outfitPreview.style.display = 'block';
+                showToast('옷 이미지 업로드 완료!', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function removeOutfitImage() {
+            outfitState.outfitImage = null;
+            outfitPreviewImg.src = '';
+            outfitPreview.style.display = 'none';
+            outfitUploadZone.style.display = 'flex';
+            outfitFileInput.value = '';
+        }
+        
+        // FLUX 2 Pro 선택 함수
+        function selectFlux2Pro() {
+            const flux2ProOption = document.querySelector('.model-option[data-model="flux-2-pro"]');
+            if (flux2ProOption) {
+                document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
+                flux2ProOption.classList.add('active');
+                state.selectedModel = 'flux-2-pro';
+                updateModelBadge();
+            }
+        }
+
+        // 스타일 프리셋 선택
+        document.querySelectorAll('.style-preset').forEach(preset => {
+            preset.addEventListener('click', () => {
+                document.querySelectorAll('.style-preset').forEach(p => p.classList.remove('active'));
+                preset.classList.add('active');
+                state.style = preset.dataset.style;
+                state.stylePrompt = preset.dataset.prompt;
+            });
+        });
+
+        // 태그 선택
+        document.querySelectorAll('.builder-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('selected');
+                const tagValue = tag.dataset.tag;
+                
+                if (tag.classList.contains('selected')) {
+                    if (!state.selectedTags.includes(tagValue)) {
+                        state.selectedTags.push(tagValue);
+                    }
+                } else {
+                    state.selectedTags = state.selectedTags.filter(t => t !== tagValue);
+                }
+            });
+        });
+
+        // 사이즈 선택
+        document.querySelectorAll('.size-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.width = parseInt(btn.dataset.width);
+                state.height = parseInt(btn.dataset.height);
+            });
+        });
+
+        // 멀티 사이즈 토글
+        document.getElementById('multiSizeToggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            state.multiSize = this.classList.contains('active');
+        });
+
+        // 파일 업로드
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        function handleFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                uploadPreview.classList.add('active');
+                uploadZone.classList.remove('active');
+                state.uploadedImage = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('removeBtn').addEventListener('click', () => {
+            uploadPreview.classList.remove('active');
+            uploadZone.classList.add('active');
+            state.uploadedImage = null;
+            fileInput.value = '';
+        });
+
+        // AI 프롬프트 최적화 (Ollama LLM 사용)
+        optimizeBtn.addEventListener('click', async () => {
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                showToast('프롬프트를 먼저 입력해주세요!', 'error');
+                return;
+            }
+            
+            // 한글이 포함되어 있는지 확인
+            if (!containsKorean(prompt)) {
+                showToast('영어 프롬프트는 이미 최적화되어 있습니다!', 'success');
+                return;
+            }
+            
+            optimizeBtn.disabled = true;
+            optimizeBtn.innerHTML = '<div class="spinner"></div><span>AI 번역 중...</span>';
+            
+            try {
+                // Ollama API 호출
+                const response = await fetch(`${API_URL}/api/translate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: prompt,
+                        style: state.style || ''
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 선택된 태그 추가
+                    let finalPrompt = data.translated;
+                    if (state.selectedTags.length > 0) {
+                        finalPrompt += ', ' + state.selectedTags.join(', ');
+                    }
+                    
+                    state.optimizedPrompt = finalPrompt;
+                    optimizedText.textContent = finalPrompt;
+                    optimizedPromptEl.classList.add('active');
+                    
+                    showToast('🧠 AI가 프롬프트를 최적화했습니다!', 'success');
+                    console.log('🧠 Ollama 번역 결과:', data);
+                } else {
+                    throw new Error(data.error || '번역 실패');
+                }
+            } catch (error) {
+                console.error('번역 오류:', error);
+                
+                // 폴백: 기존 사전 기반 변환
+                showToast('⚠️ AI 서버 연결 실패, 기본 변환 사용', 'error');
+                state.optimizedPrompt = optimizeKoreanPrompt(prompt);
+                optimizedText.textContent = state.optimizedPrompt;
+                optimizedPromptEl.classList.add('active');
+            } finally {
+                optimizeBtn.disabled = false;
+                optimizeBtn.innerHTML = '<span>🧠</span><span>AI 프롬프트 최적화</span>';
+            }
+        });
+
+        // 이미지 생성
+        generateBtn.addEventListener('click', async () => {
+            // 1. 생성 가능 여부 체크 (사용량 제한)
+            if (!canGenerate()) {
+                return;
+            }
+
+            // Try-On 모드 처리
+            if (state.mode === 'tryon') {
+                await handleTryOn();
+                return;
+            }
+            
+            // 의상 캐릭터 모드 처리
+            if (state.mode === 'outfit') {
+                await handleOutfitCharacter();
+                return;
+            }
+
+            let prompt = promptInput.value.trim();
+            if (!prompt) {
+                showToast('프롬프트를 입력해주세요!', 'error');
+                return;
+            }
+            
+            // 한글이 포함되어 있으면 Ollama로 번역
+            let finalPrompt;
+            if (containsKorean(prompt)) {
+                // 이미 최적화된 프롬프트가 있으면 사용
+                if (state.optimizedPrompt) {
+                    finalPrompt = state.optimizedPrompt;
+                    console.log('✅ 기존 최적화 프롬프트 사용:', finalPrompt);
+                } else {
+                    // Ollama로 번역 시도
+                    generateBtn.disabled = true;
+                    generateBtn.innerHTML = '<div class="spinner"></div><span>AI 번역 중...</span>';
+                    
+                    try {
+                        const response = await fetch(`${API_URL}/api/translate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                text: prompt,
+                                style: state.style || ''
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            finalPrompt = data.translated;
+                            if (state.selectedTags.length > 0) {
+                                finalPrompt += ', ' + state.selectedTags.join(', ');
+                            }
+                            console.log('🧠 Ollama 번역:', prompt, '→', finalPrompt);
+                        } else {
+                            throw new Error(data.error);
+                        }
+                    } catch (error) {
+                        console.warn('Ollama 실패, 폴백 사용:', error);
+                        finalPrompt = optimizeKoreanPrompt(prompt);
+                    }
+                    
+                    // 최적화된 프롬프트 UI에 표시
+                    optimizedText.textContent = finalPrompt;
+                    optimizedPromptEl.classList.add('active');
+                }
+            } else {
+                // 영어인 경우에도 스타일/태그 추가
+                finalPrompt = prompt;
+                if (state.stylePrompt) {
+                    finalPrompt += ', ' + state.stylePrompt;
+                }
+                if (state.selectedTags.length > 0) {
+                    finalPrompt += ', ' + state.selectedTags.join(', ');
+                }
+            }
+            
+            console.log('📤 최종 프롬프트:', finalPrompt);
+            
+            // 생성할 사이즈 목록
+            const sizes = state.multiSize 
+                ? [
+                    { width: 1024, height: 1024, label: '1:1' },
+                    { width: 1280, height: 720, label: '16:9' },
+                    { width: 720, height: 1280, label: '9:16' }
+                  ]
+                : [{ width: state.width, height: state.height, label: `${state.width}x${state.height}` }];
+            
+            // UI 업데이트
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="spinner"></div><span>생성 중...</span>';
+            progressSection.classList.add('active');
+            statusDot.classList.add('processing');
+            state.images = [];
+            
+            // 결과 그리드 초기화
+            resultGrid.innerHTML = '';
+            sizes.forEach((size, i) => {
+                resultGrid.innerHTML += `
+                    <div class="result-card" id="result-${i}">
+                        <div class="result-image">
+                            <div class="loading-overlay">
+                                <div class="ai-loader"></div>
+                            </div>
+                        </div>
+                        <div class="result-info">
+                            <div class="result-meta">
+                                <span class="result-style">${state.style !== 'none' ? state.style.toUpperCase() : 'CUSTOM'}</span>
+                                <span>${size.label}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            try {
+                for (let i = 0; i < sizes.length; i++) {
+                    const size = sizes[i];
+                    const progress = (i / sizes.length) * 100;
+                    progressFill.style.width = `${progress}%`;
+                    progressPercent.textContent = `${Math.round(progress)}%`;
+                    
+                    // 모드별 처리
+                    const isEditMode = state.mode === 'transform' && state.uploadedImage;
+                    const modeText = isEditMode ? '편집' : '생성';
+                    progressLabel.textContent = `이미지 ${i + 1}/${sizes.length} ${modeText} 중... (${size.label})`;
+                    
+                    // API 요청 데이터
+                    const requestData = {
+                        prompt: finalPrompt,
+                        type: 'custom',
+                        width: size.width,
+                        height: size.height,
+                        model: state.selectedModel
+                    };
+                    
+                    // 이미지 편집 모드
+                    if (isEditMode) {
+                        requestData.input_image = state.uploadedImage;
+                        requestData.edit_mode = true;
+                        requestData.model = 'flux-2-pro';
+                    }
+                    
+                    // 인증 토큰 포함하여 요청
+                    const token = localStorage.getItem('kampai_token');
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (token) {
+                        headers['Authorization'] = `Bearer ${token}`;
+                    }
+                    
+                    const response = await fetch(`${API_URL}/api/generate`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(requestData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.images?.length > 0) {
+                        // Replicate API: 전체 URL 반환 / ComfyUI: 로컬 파일명 반환
+                        let imageUrl = data.images[0];
+                        
+                        // 로컬 파일명인 경우 (ComfyUI) API URL로 변환
+                        if (!imageUrl.startsWith('http')) {
+                            const filename = imageUrl.split(/[/\\]/).pop();
+                            imageUrl = `${API_URL}/api/image/${encodeURIComponent(filename)}`;
+                        }
+                        
+                        state.images.push({ url: imageUrl, filename: imageUrl.split('/').pop(), size: size.label });
+                        
+                        // 히스토리에 저장
+                        addToHistory({
+                            url: imageUrl,
+                            prompt: finalPrompt,
+                            model: data.model || state.selectedModel || 'flux-schnell',
+                            size: size.label
+                        });
+                        
+                        const card = document.getElementById(`result-${i}`);
+                        card.querySelector('.result-image').innerHTML = `
+                            <img src="${imageUrl}" alt="Generated">
+                            <div class="image-overlay">
+                                <div class="overlay-actions">
+                                    <button class="overlay-btn" onclick="downloadImage('${imageUrl}', 'kampai_${size.label}_${Date.now()}.png')">
+                                        ⬇ 다운로드
+                                    </button>
+                                    <button class="overlay-btn" onclick="window.open('${imageUrl}', '_blank')">
+                                        🔍 확대
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        throw new Error(data.error || '생성 실패');
+                    }
+                }
+                
+                // 완료
+                progressFill.style.width = '100%';
+                progressPercent.textContent = '100%';
+                progressLabel.textContent = '✨ 생성 완료!';
+                resultCount.textContent = `${sizes.length}장`;
+                showToast(`${sizes.length}장의 이미지가 생성되었습니다!`, 'success');
+                
+                // 사용량 기록
+                if (authState.isLoggedIn) {
+                    await recordUsage();
+                } else {
+                    recordGuestUsage();
+                    const remaining = 3 - parseInt(localStorage.getItem('kampai_guest_count') || '0');
+                    if (remaining > 0) {
+                        showToast(`무료 체험 ${remaining}회 남았습니다. 로그인하면 더 많은 기능을 사용할 수 있어요!`, 'info');
+                    }
+                }
+                
+            } catch (error) {
+                console.error(error);
+                showToast('오류: ' + error.message, 'error');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<span>⚡</span><span>이미지 생성</span>';
+                statusDot.classList.remove('processing');
+            }
+        });
+
+        // 다운로드 함수
+        function downloadImage(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // 토스트 알림
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✅' : '❌'}</span>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // Virtual Try-On 처리 함수
+        async function handleTryOn() {
+            if (!tryonState.humanImage) {
+                showToast('캐릭터/사람 이미지를 업로드해주세요!', 'error');
+                return;
+            }
+            
+            if (!tryonState.garmentImage) {
+                showToast('옷 이미지를 업로드해주세요!', 'error');
+                return;
+            }
+            
+            const garmentDescription = document.getElementById('garmentDescription')?.value || 'clothing item';
+            
+            // UI 업데이트
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="spinner"></div><span>옷 입히는 중... (15-25초)</span>';
+            progressSection.classList.add('active');
+            progressFill.style.width = '20%';
+            progressLabel.textContent = '👗 Virtual Try-On 처리 중... (IDM-VTON)';
+            statusDot.classList.add('processing');
+            
+            // 결과 그리드 초기화
+            resultGrid.innerHTML = `
+                <div class="result-card" id="result-tryon">
+                    <div class="result-image">
+                        <div class="loading-overlay">
+                            <div class="ai-loader"></div>
+                        </div>
+                    </div>
+                    <div class="result-info">
+                        <div class="result-meta">
+                            <span class="result-style">TRY-ON</span>
+                            <span>IDM-VTON</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            try {
+                // 프로그레스 애니메이션
+                let progress = 20;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += 5;
+                        progressFill.style.width = `${progress}%`;
+                        progressPercent.textContent = `${progress}%`;
+                    }
+                }, 1500);
+                
+                // 인증 토큰
+                const token = localStorage.getItem('kampai_token');
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                const response = await fetch(`${API_URL}/api/tryon`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        human_image: tryonState.humanImage,
+                        garment_image: tryonState.garmentImage,
+                        garment_description: garmentDescription,
+                        category: tryonState.category
+                    })
+                });
+                
+                clearInterval(progressInterval);
+                
+                const data = await response.json();
+                
+                if (data.success && data.images?.length > 0) {
+                    const imageUrl = data.images[0];
+                    
+                    // 히스토리에 저장
+                    addToHistory({
+                        url: imageUrl,
+                        prompt: `Try-On: ${garmentDescription}`,
+                        model: 'IDM-VTON',
+                        size: 'tryon'
+                    });
+                    
+                    const card = document.getElementById('result-tryon');
+                    card.querySelector('.result-image').innerHTML = `
+                        <img src="${imageUrl}" alt="Try-On Result">
+                        <div class="image-overlay">
+                            <div class="overlay-actions">
+                                <button class="overlay-btn" onclick="downloadImage('${imageUrl}', 'kampai_tryon_${Date.now()}.png')">
+                                    ⬇ 다운로드
+                                </button>
+                                <button class="overlay-btn" onclick="window.open('${imageUrl}', '_blank')">
+                                    🔍 확대
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    progressFill.style.width = '100%';
+                    progressPercent.textContent = '100%';
+                    progressLabel.textContent = '✨ AI 피팅 완료!';
+                    resultCount.textContent = '1장';
+                    showToast(`AI 피팅 완료! (${data.time_taken || '?'}초, $${data.cost || 0.034})`, 'success');
+                    
+                    // 사용량 기록
+                    if (authState.isLoggedIn) {
+                        await recordUsage();
+                    }
+                } else {
+                    throw new Error(data.error || 'Virtual Try-On 실패');
+                }
+            } catch (error) {
+                console.error('Try-On 오류:', error);
+                showToast(error.message || 'Virtual Try-On 실패', 'error');
+                
+                const card = document.getElementById('result-tryon');
+                if (card) {
+                    card.querySelector('.result-image').innerHTML = `
+                        <div class="placeholder">
+                            <div class="placeholder-icon">❌</div>
+                            <div>${error.message || '오류 발생'}</div>
+                        </div>
+                    `;
+                }
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<span class="btn-icon">🎨</span><span>생성하기</span>';
+                statusDot.classList.remove('processing');
+                setTimeout(() => progressSection.classList.remove('active'), 2000);
+            }
+        }
+
+        // 의상 캐릭터 생성 함수 (FLUX Kontext Dev)
+        async function handleOutfitCharacter() {
+            if (!outfitState.outfitImage) {
+                showToast('옷 이미지를 업로드해주세요!', 'error');
+                return;
+            }
+            
+            const outfitPrompt = document.getElementById('outfitPrompt').value.trim();
+            if (!outfitPrompt) {
+                showToast('캐릭터 설명을 입력해주세요!', 'error');
+                return;
+            }
+            
+            // 프로그레스 섹션 표시
+            const progressSection = document.querySelector('.progress-section');
+            const progressLabel = document.getElementById('progressLabel');
+            const progressFill = document.querySelector('.progress-fill');
+            const progressPercent = document.getElementById('progressPercent');
+            const statusDot = document.querySelector('.status-dot');
+            const resultCount = document.getElementById('resultCount');
+            const resultsGrid = document.getElementById('resultGrid');
+            
+            progressSection.classList.add('active');
+            statusDot.classList.add('processing');
+            progressLabel.textContent = '🎨 의상 캐릭터 생성 중...';
+            progressFill.style.width = '10%';
+            progressPercent.textContent = '10%';
+            
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="spinner"></div><span>생성 중...</span>';
+            
+            // 결과 카드 준비
+            resultsGrid.innerHTML = `
+                <div class="result-card" id="result-outfit">
+                    <div class="result-image">
+                        <div class="placeholder">
+                            <div class="placeholder-icon">🎨</div>
+                            <div>의상 캐릭터 생성 중...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 프로그레스 애니메이션
+            let progress = 10;
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += Math.random() * 5;
+                    progressFill.style.width = `${Math.min(progress, 90)}%`;
+                    progressPercent.textContent = `${Math.round(Math.min(progress, 90))}%`;
+                }
+            }, 500);
+            
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                // 인증 토큰 추가
+                const token = localStorage.getItem('authToken');
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                console.log('📤 의상 캐릭터 API 호출 시작...');
+                console.log('이미지 크기:', outfitState.outfitImage?.length || 0);
+                console.log('프롬프트:', outfitPrompt);
+                console.log('비율:', outfitState.aspectRatio);
+                
+                const response = await fetch(`${API_URL}/api/outfit-character`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        outfit_image: outfitState.outfitImage,
+                        prompt: outfitPrompt,
+                        aspect_ratio: outfitState.aspectRatio
+                    })
+                });
+                
+                console.log('📥 API 응답 수신:', response.status);
+                
+                clearInterval(progressInterval);
+                
+                const data = await response.json();
+                console.log('📋 응답 데이터:', data);
+                
+                if (data.success && data.images?.length > 0) {
+                    const imageUrl = data.images[0];
+                    
+                    // 히스토리에 저장
+                    addToHistory({
+                        url: imageUrl,
+                        prompt: `의상 캐릭터: ${outfitPrompt}`,
+                        model: 'FLUX Kontext',
+                        size: outfitState.aspectRatio
+                    });
+                    
+                    const card = document.getElementById('result-outfit');
+                    card.querySelector('.result-image').innerHTML = `
+                        <img src="${imageUrl}" alt="Outfit Character">
+                        <div class="image-overlay">
+                            <div class="overlay-actions">
+                                <button class="overlay-btn" onclick="downloadImage('${imageUrl}', 'kampai_outfit_${Date.now()}.png')">
+                                    ⬇ 다운로드
+                                </button>
+                                <button class="overlay-btn" onclick="window.open('${imageUrl}', '_blank')">
+                                    🔍 확대
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    progressFill.style.width = '100%';
+                    progressPercent.textContent = '100%';
+                    progressLabel.textContent = '✨ 의상 캐릭터 생성 완료!';
+                    resultCount.textContent = '1장';
+                    showToast(`의상 캐릭터 생성 완료! (${data.time_taken || '?'}초, $${data.cost || 0.025})`, 'success');
+                    
+                    // 사용량 기록
+                    if (authState.isLoggedIn) {
+                        await recordUsage();
+                    }
+                } else {
+                    throw new Error(data.error || '의상 캐릭터 생성 실패');
+                }
+            } catch (error) {
+                console.error('의상 캐릭터 오류:', error);
+                showToast(error.message || '의상 캐릭터 생성 실패', 'error');
+                
+                const card = document.getElementById('result-outfit');
+                if (card) {
+                    card.querySelector('.result-image').innerHTML = `
+                        <div class="placeholder">
+                            <div class="placeholder-icon">❌</div>
+                            <div>${error.message || '오류 발생'}</div>
+                        </div>
+                    `;
+                }
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<span class="btn-icon">🎨</span><span>생성하기</span>';
+                statusDot.classList.remove('processing');
+                setTimeout(() => progressSection.classList.remove('active'), 2000);
+            }
+        }
+
+        // 키보드 단축키
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                generateBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>

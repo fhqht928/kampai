@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 - Kampai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Toss Payments SDK -->
+    <script src="https://js.tosspayments.com/v1/payment"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%); }
+        .gradient-text { background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="text-2xl font-bold gradient-text">🍺 Kampai</a>
+                <a href="index.html" class="text-gray-500 hover:text-gray-700 flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    돌아가기
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <!-- 결제 진행 상태 -->
+        <div class="flex items-center justify-center gap-4 mb-12">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm">✓</div>
+                <span class="text-sm font-medium text-green-600">플랜 선택</span>
+            </div>
+            <div class="w-16 h-0.5 bg-green-500"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm">✓</div>
+                <span class="text-sm font-medium text-green-600">회원가입</span>
+            </div>
+            <div class="w-16 h-0.5 bg-purple-500"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full gradient-bg text-white flex items-center justify-center text-sm">3</div>
+                <span class="text-sm font-medium gradient-text">결제</span>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- 플랜 정보 -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <h2 class="text-xl font-bold mb-6">선택한 플랜</h2>
+                
+                <div id="planDetails" class="border-2 border-purple-200 rounded-xl p-6 bg-purple-50">
+                    <!-- 동적으로 채워짐 -->
+                </div>
+
+                <div class="mt-6 space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">월간 구독료</span>
+                        <span id="monthlyPrice" class="font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">부가세 (10%)</span>
+                        <span id="taxAmount" class="font-medium">-</span>
+                    </div>
+                    <hr>
+                    <div class="flex justify-between text-lg font-bold">
+                        <span>총 결제 금액</span>
+                        <span id="totalPrice" class="gradient-text">-</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-500">
+                    <p>💡 <strong>결제 안내</strong></p>
+                    <ul class="mt-2 space-y-1 text-xs">
+                        <li>• 월간 자동 결제됩니다</li>
+                        <li>• 언제든 해지 가능합니다</li>
+                        <li>• 결제 후 즉시 사용 가능합니다</li>
+                        <li>• 7일 이내 환불 보장</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 결제 방법 -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <h2 class="text-xl font-bold mb-6">결제 방법</h2>
+                
+                <!-- 결제 수단 선택 -->
+                <div class="space-y-3 mb-6">
+                    <label class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer hover:border-purple-300 transition payment-method active" data-method="card">
+                        <input type="radio" name="paymentMethod" value="card" checked class="w-4 h-4 text-purple-600">
+                        <i data-lucide="credit-card" class="w-5 h-5 text-gray-600"></i>
+                        <span class="font-medium">신용/체크카드</span>
+                    </label>
+                    
+                    <label class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer hover:border-purple-300 transition payment-method" data-method="kakaopay">
+                        <input type="radio" name="paymentMethod" value="kakaopay" class="w-4 h-4 text-purple-600">
+                        <span class="text-xl">💛</span>
+                        <span class="font-medium">카카오페이</span>
+                    </label>
+                    
+                    <label class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer hover:border-purple-300 transition payment-method" data-method="naverpay">
+                        <input type="radio" name="paymentMethod" value="naverpay" class="w-4 h-4 text-purple-600">
+                        <span class="text-xl">💚</span>
+                        <span class="font-medium">네이버페이</span>
+                    </label>
+                    
+                    <label class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer hover:border-purple-300 transition payment-method" data-method="transfer">
+                        <input type="radio" name="paymentMethod" value="transfer" class="w-4 h-4 text-purple-600">
+                        <i data-lucide="building" class="w-5 h-5 text-gray-600"></i>
+                        <span class="font-medium">계좌이체</span>
+                    </label>
+                </div>
+
+                <!-- 약관 동의 -->
+                <div class="space-y-2 mb-6 text-sm">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="agreeAll" class="w-4 h-4 text-purple-600 rounded">
+                        <span class="font-medium">전체 동의</span>
+                    </label>
+                    <div class="pl-6 space-y-1 text-gray-500">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="agree-item w-3 h-3" required>
+                            <span>(필수) 서비스 이용약관</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="agree-item w-3 h-3" required>
+                            <span>(필수) 개인정보 처리방침</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="agree-item w-3 h-3" required>
+                            <span>(필수) 결제 및 환불 정책</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 결제 버튼 -->
+                <button id="payButton" onclick="processPayment()" class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    결제하기
+                </button>
+                
+                <p class="text-center text-xs text-gray-400 mt-4">
+                    🔒 결제 정보는 암호화되어 안전하게 처리됩니다
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        
+        // 플랜 정보
+        const PLANS = {
+            basic: {
+                name: 'Basic',
+                price: 4900,
+                features: ['하루 30장 생성', 'FLUX Schnell', '1024x1024', '워터마크 없음', '상업적 사용 OK']
+            },
+            pro: {
+                name: 'Pro',
+                price: 19900,
+                features: ['하루 100장 생성', '모델 선택 가능', 'Qwen-Image / FLUX 2 Pro / FLUX Ultra', '최대 2048x2048', '우선 처리']
+            },
+            business: {
+                name: 'Business',
+                price: 99000,
+                features: ['하루 500장 생성', '모든 프리미엄 모델', '팀원 5명', 'API 액세스', '전담 지원']
+            }
+        };
+
+        // URL에서 플랜 파라미터 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedPlan = urlParams.get('plan');
+        
+        // 인증 확인
+        const token = localStorage.getItem('kampai_token');
+        const user = JSON.parse(localStorage.getItem('kampai_user') || 'null');
+        
+        if (!token || !user) {
+            alert('로그인이 필요합니다');
+            window.location.href = 'index.html';
+        }
+        
+        if (!selectedPlan || !PLANS[selectedPlan]) {
+            alert('유효하지 않은 플랜입니다');
+            window.location.href = 'index.html#pricing';
+        }
+
+        // 플랜 정보 표시
+        function displayPlanInfo() {
+            const plan = PLANS[selectedPlan];
+            const tax = Math.round(plan.price * 0.1);
+            const total = plan.price + tax;
+            
+            document.getElementById('planDetails').innerHTML = `
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold gradient-text">${plan.name}</h3>
+                    <div class="text-3xl font-bold mt-2">${plan.price.toLocaleString()}<span class="text-lg text-gray-500">원/월</span></div>
+                </div>
+                <ul class="mt-4 space-y-2">
+                    ${plan.features.map(f => `
+                        <li class="flex items-center gap-2 text-sm">
+                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                            ${f}
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            
+            document.getElementById('monthlyPrice').textContent = `${plan.price.toLocaleString()}원`;
+            document.getElementById('taxAmount').textContent = `${tax.toLocaleString()}원`;
+            document.getElementById('totalPrice').textContent = `${total.toLocaleString()}원`;
+            
+            // Lucide 아이콘 재초기화
+            lucide.createIcons();
+        }
+
+        // 결제 수단 선택 UI
+        document.querySelectorAll('.payment-method').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.payment-method').forEach(m => {
+                    m.classList.remove('active', 'border-purple-500');
+                    m.classList.add('border-gray-200');
+                });
+                el.classList.add('active', 'border-purple-500');
+                el.classList.remove('border-gray-200');
+            });
+        });
+
+        // 전체 동의
+        document.getElementById('agreeAll').addEventListener('change', function() {
+            document.querySelectorAll('.agree-item').forEach(cb => {
+                cb.checked = this.checked;
+            });
+            updatePayButton();
+        });
+
+        // 개별 동의
+        document.querySelectorAll('.agree-item').forEach(cb => {
+            cb.addEventListener('change', updatePayButton);
+        });
+
+        function updatePayButton() {
+            const allChecked = Array.from(document.querySelectorAll('.agree-item')).every(cb => cb.checked);
+            document.getElementById('payButton').disabled = !allChecked;
+            
+            // 전체 동의 체크박스 상태 업데이트
+            document.getElementById('agreeAll').checked = allChecked;
+        }
+
+        // 결제 처리
+        async function processPayment() {
+            const btn = document.getElementById('payButton');
+            const plan = PLANS[selectedPlan];
+            const tax = Math.round(plan.price * 0.1);
+            const total = plan.price + tax;
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            
+            btn.disabled = true;
+            btn.textContent = '결제 처리 중...';
+
+            try {
+                // 1. 서버에서 주문 생성
+                const orderResponse = await fetch(`${API_URL}/api/payment/create-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        plan: selectedPlan,
+                        amount: total,
+                        paymentMethod: paymentMethod
+                    })
+                });
+
+                const orderData = await orderResponse.json();
+
+                if (!orderData.success) {
+                    throw new Error(orderData.error || '주문 생성 실패');
+                }
+
+                // 2. 테스트 모드: 바로 성공 처리 (실제 운영시 토스페이먼츠 연동)
+                if (orderData.testMode) {
+                    // 테스트 모드에서는 바로 결제 성공 처리
+                    const confirmResponse = await fetch(`${API_URL}/api/payment/confirm`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            orderId: orderData.orderId,
+                            paymentKey: 'test_payment_' + Date.now(),
+                            amount: total
+                        })
+                    });
+
+                    const confirmData = await confirmResponse.json();
+
+                    if (confirmData.success) {
+                        // 사용자 정보 업데이트
+                        localStorage.setItem('kampai_user', JSON.stringify({
+                            ...user,
+                            plan: selectedPlan
+                        }));
+                        localStorage.removeItem('kampai_selected_plan');
+                        
+                        alert(`🎉 ${plan.name} 플랜 결제가 완료되었습니다!\n지금 바로 이용하세요.`);
+                        window.location.href = 'generate.html';
+                    } else {
+                        throw new Error(confirmData.error || '결제 확인 실패');
+                    }
+                } else {
+                    // 실제 토스페이먼츠 결제 (추후 구현)
+                    const tossPayments = TossPayments(orderData.clientKey);
+                    
+                    await tossPayments.requestPayment(paymentMethod === 'card' ? '카드' : paymentMethod, {
+                        amount: total,
+                        orderId: orderData.orderId,
+                        orderName: `Kampai ${plan.name} 플랜 (월간)`,
+                        customerName: user.name || user.email,
+                        successUrl: `${window.location.origin}/payment-success.html`,
+                        failUrl: `${window.location.origin}/payment-fail.html`
+                    });
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('결제 처리 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '결제하기';
+                updatePayButton();
+            }
+        }
+
+        // 초기화
+        displayPlanInfo();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
