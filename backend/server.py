@@ -15,6 +15,7 @@ from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import json
 import uuid
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 import threading
@@ -49,7 +50,7 @@ from replicate_api import (
 from auth import (
     register_user, login_user, token_required, optional_token,
     get_user_usage, check_can_generate, increment_usage,
-    get_subscription_status, PLANS
+    get_subscription_status, PLANS, DB_PATH
 )
 from payment import (
     create_payment_order, confirm_payment, cancel_payment,
@@ -1022,6 +1023,42 @@ def api_cancel_payment():
     result = cancel_payment(payment_key, reason)
     status_code = 200 if result['success'] else 400
     return jsonify(result), status_code
+
+
+@app.route('/api/subscription/cancel', methods=['POST'])
+@token_required
+def api_cancel_subscription():
+    """구독 취소 (Free 플랜으로 다운그레이드)"""
+    user = request.user
+    current_plan = user.get('plan', 'free')
+    
+    if current_plan == 'free':
+        return jsonify({
+            "success": False, 
+            "error": "이미 무료 플랜입니다"
+        }), 400
+    
+    try:
+        # 사용자 플랜을 free로 변경
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE users 
+            SET plan = 'free', plan_expires = NULL 
+            WHERE id = ?
+        ''', (user['id'],))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "구독이 취소되었습니다. 무료 플랜으로 변경되었습니다."
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"구독 취소 중 오류: {str(e)}"
+        }), 500
 
 
 @app.route('/api/payment/history', methods=['GET'])
