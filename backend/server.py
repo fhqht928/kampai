@@ -1057,7 +1057,15 @@ def api_check_generate():
 # ============================================
 
 def select_server_mode():
-    """사용자에게 서버 모드 선택 받기"""
+    """서버 모드 결정 - 환경변수 우선, 없으면 사용자 입력"""
+    # 환경변수로 모드가 설정되어 있으면 자동 사용 (Railway, Heroku 등)
+    env_mode = os.environ.get("KAMPAI_ENV", "").lower()
+    if env_mode == "production":
+        return "production"
+    elif env_mode == "development":
+        return "development"
+    
+    # 환경변수 없으면 사용자에게 물어봄 (로컬 개발용)
     print("")
     print("서버 모드를 선택하세요:")
     print("  [1] 개발 서버 (Development) - debug=True, 자동 리로드")
@@ -1065,13 +1073,17 @@ def select_server_mode():
     print("")
     
     while True:
-        choice = input("선택 (1 또는 2, 기본값=1): ").strip()
-        if choice == "" or choice == "1":
-            return "development"
-        elif choice == "2":
+        try:
+            choice = input("선택 (1 또는 2, 기본값=1): ").strip()
+            if choice == "" or choice == "1":
+                return "development"
+            elif choice == "2":
+                return "production"
+            else:
+                print("  ⚠️ 1 또는 2를 입력하세요")
+        except EOFError:
+            # 입력이 불가능한 환경 (Railway 등)에서는 production으로
             return "production"
-        else:
-            print("  ⚠️ 1 또는 2를 입력하세요")
 
 
 if __name__ == '__main__':
