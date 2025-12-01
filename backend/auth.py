@@ -1389,5 +1389,33 @@ else:
     DB_PATH = None
 
 
+# 기본 관리자 이메일 (환경변수 또는 하드코딩)
+ADMIN_EMAILS = os.environ.get("ADMIN_EMAILS", "kampai9909@gmail.com").split(",")
+
+
+def ensure_admin_accounts():
+    """기본 관리자 계정 설정"""
+    conn = get_db_connection()
+    c = conn.cursor()
+    ph = get_placeholder()
+    
+    for email in ADMIN_EMAILS:
+        email = email.strip()
+        if not email:
+            continue
+        
+        # 사용자가 존재하면 관리자로 설정
+        c.execute(f"SELECT id FROM users WHERE email = {ph}", (email,))
+        user = c.fetchone()
+        
+        if user:
+            c.execute(f"UPDATE users SET is_admin = TRUE WHERE email = {ph}", (email,))
+            print(f"👑 관리자 설정: {email}")
+    
+    conn.commit()
+    conn.close()
+
+
 # 초기화
 init_db()
+ensure_admin_accounts()
