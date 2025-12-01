@@ -1,6 +1,6 @@
 # ============================================
-# Kampai ?�증 & 구독 ?�스??
-# ?�원가?? 로그?? JWT ?�증, 구독 관�?
+# Kampai 인증 & 구독 시스템
+# 회원가입, 로그인, JWT 인증, 구독 관리
 # ============================================
 
 import os
@@ -14,30 +14,19 @@ from flask import request, jsonify
 from pathlib import Path
 from dotenv import load_dotenv
 
-# .env ?�일 로드
+# .env 파일 로드
 env_path = Path(__file__).parent / '.env'
 load_dotenv(env_path)
 
-# ?�이?�베?�스 ?�정
-# PostgreSQL URL???�으�?PostgreSQL ?�용, ?�으�?SQLite ?�용
-DATABASE_URL = os.environ.get("DATABASE_URL")
-USE_POSTGRES = DATABASE_URL is not None
-
-if USE_POSTGRES:
-    import psycopg2
-    from psycopg2.extras import RealDictCursor
-    print("?�� PostgreSQL ?�용")
-else:
-    # ?�라?�드 ?�경?�서???��? 경로 ?�용
-    _default_db = Path(__file__).parent / "kampai.db"
-    DB_PATH = Path(os.environ.get("DB_PATH", str(_default_db)))
-    print(f"?�� SQLite ?�용: {DB_PATH}")
-
-# JWT_SECRET: .env???�정??�??�용, ?�으�??�덤 ?�성 (?�버 ?�시?????�션 무효??
+# 설정 (.env에서 로드)
+# 클라우드 환경에서는 상대 경로 사용
+_default_db = Path(__file__).parent / "kampai.db"
+DB_PATH = Path(os.environ.get("DB_PATH", str(_default_db)))
+# JWT_SECRET: .env에 설정된 값 사용, 없으면 랜덤 생성 (서버 재시작 시 세션 무효화)
 JWT_SECRET = os.environ.get("JWT_SECRET") or secrets.token_hex(32)
-JWT_EXPIRY_HOURS = 24 * 7  # 7??
+JWT_EXPIRY_HOURS = 24 * 7  # 7일
 
-# ?�랜 ?�의 (4?�계 + 모델 차등)
+# 플랜 정의 (4단계 + 모델 차등)
 PLANS = {
     "free": {
         "name": "Free",
@@ -48,7 +37,7 @@ PLANS = {
         "resolution": "1024x1024",
         "watermark": True,
         "commercial": False,
-        "speed": "2-4�?,
+        "speed": "2-4초",
         "cost_per_image": 0.003
     },
     "basic": {
@@ -60,7 +49,7 @@ PLANS = {
         "resolution": "1024x1024",
         "watermark": False,
         "commercial": True,
-        "speed": "2-4�?,
+        "speed": "2-4초",
         "cost_per_image": 0.003
     },
     "pro": {
@@ -73,9 +62,9 @@ PLANS = {
         "resolution": "2048x2048",
         "watermark": False,
         "commercial": True,
-        "speed": "3-8�?,
+        "speed": "3-8초",
         "cost_per_image": 0.025,
-        "features": ["모델 ?�택", "?�스???�더�?, "4K 지??]
+        "features": ["모델 선택", "텍스트 렌더링", "4K 지원"]
     },
     "business": {
         "name": "Business",
@@ -87,7 +76,7 @@ PLANS = {
         "resolution": "2048x2048",
         "watermark": False,
         "commercial": True,
-        "speed": "3-8�?,
+        "speed": "3-8초",
         "cost_per_image": 0.025,
         "team_members": 5,
         "api_access": True
@@ -95,174 +84,99 @@ PLANS = {
 }
 
 
-def get_db_connection():
-    """?�이?�베?�스 ?�결 반환"""
-    if USE_POSTGRES:
-        conn = psycopg2.connect(DATABASE_URL)
-        return conn
-    else:
-        conn = get_db_connection()
-        conn.row_factory = sqlite3.Row
-        return conn
-
-
-def db_placeholder():
-    """SQL placeholder 반환 (PostgreSQL: %s, SQLite: ?)"""
-    return "%s" if USE_POSTGRES else "?"
-
-
 def init_db():
-    """?�이?�베?�스 초기??""
-    conn = get_db_connection()
+    """데이터베이스 초기화"""
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    if USE_POSTGRES:
-        # PostgreSQL???�이�??�성
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                name TEXT,
-                plan TEXT DEFAULT 'free',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP,
-                is_active BOOLEAN DEFAULT TRUE
-            )
-        ''')
-        
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS subscriptions (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL REFERENCES users(id),
-                plan TEXT NOT NULL,
-                status TEXT DEFAULT 'active',
-                started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                expires_at TIMESTAMP,
-                payment_key TEXT,
-                order_id TEXT
-            )
-        ''')
-        
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS usage (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL REFERENCES users(id),
-                date DATE DEFAULT CURRENT_DATE,
-                generation_count INTEGER DEFAULT 0,
-                UNIQUE(user_id, date)
-            )
-        ''')
-        
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS generations (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL REFERENCES users(id),
-                prompt TEXT,
-                style TEXT,
-                image_path TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS payments (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL REFERENCES users(id),
-                order_id TEXT UNIQUE NOT NULL,
-                payment_key TEXT,
-                amount INTEGER NOT NULL,
-                plan TEXT NOT NULL,
-                status TEXT DEFAULT 'pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                approved_at TIMESTAMP
-            )
-        ''')
-    else:
-        # SQLite???�이�??�성 (기존 코드)
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                name TEXT,
-                plan TEXT DEFAULT 'free',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP,
-                is_active BOOLEAN DEFAULT 1
-            )
-        ''')
-        
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS subscriptions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                plan TEXT NOT NULL,
-                status TEXT DEFAULT 'active',
-                started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                expires_at TIMESTAMP,
-                payment_key TEXT,
-                order_id TEXT,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
-        
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS usage (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                date DATE DEFAULT (DATE('now')),
-                generation_count INTEGER DEFAULT 0,
-                FOREIGN KEY (user_id) REFERENCES users(id),
-                UNIQUE(user_id, date)
-            )
-        ''')
-        
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS generations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                prompt TEXT,
-                style TEXT,
-                image_path TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
-        
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS payments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                order_id TEXT UNIQUE NOT NULL,
-                payment_key TEXT,
-                amount INTEGER NOT NULL,
-                plan TEXT NOT NULL,
-                status TEXT DEFAULT 'pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                approved_at TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
+    # 사용자 테이블
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            name TEXT,
+            plan TEXT DEFAULT 'free',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_login TIMESTAMP,
+            is_active BOOLEAN DEFAULT 1
+        )
+    ''')
+    
+    # 구독 테이블
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS subscriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            plan TEXT NOT NULL,
+            status TEXT DEFAULT 'active',
+            started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP,
+            payment_key TEXT,
+            order_id TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    # 사용량 테이블
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS usage (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            date DATE DEFAULT (DATE('now')),
+            generation_count INTEGER DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE(user_id, date)
+        )
+    ''')
+    
+    # 생성 기록 테이블
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS generations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            prompt TEXT,
+            style TEXT,
+            image_path TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    # 결제 기록 테이블
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            order_id TEXT UNIQUE NOT NULL,
+            payment_key TEXT,
+            amount INTEGER NOT NULL,
+            plan TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            approved_at TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
     
     conn.commit()
     conn.close()
-    print("??Database initialized")
+    print("✅ Database initialized")
 
 
 def hash_password(password: str) -> str:
-    """비�?번호 ?�싱"""
-    salt = "kampai_salt_2025"  # ?�로?�션?�서??개별 salt ?�용
+    """비밀번호 해싱"""
+    salt = "kampai_salt_2025"  # 프로덕션에서는 개별 salt 사용
     return hashlib.sha256(f"{password}{salt}".encode()).hexdigest()
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    """비�?번호 검�?""
+    """비밀번호 검증"""
     return hash_password(password) == password_hash
 
 
 def create_token(user_id: int, email: str) -> str:
-    """JWT ?�큰 ?�성"""
+    """JWT 토큰 생성"""
     payload = {
         "user_id": user_id,
         "email": email,
@@ -272,7 +186,7 @@ def create_token(user_id: int, email: str) -> str:
 
 
 def verify_token(token: str) -> dict:
-    """JWT ?�큰 검�?""
+    """JWT 토큰 검증"""
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         return payload
@@ -283,7 +197,7 @@ def verify_token(token: str) -> dict:
 
 
 def token_required(f):
-    """?�증 ?�수 ?�코?�이??""
+    """인증 필수 데코레이터"""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
@@ -294,21 +208,21 @@ def token_required(f):
                 token = auth_header.split(' ')[1]
         
         if not token:
-            return jsonify({"success": False, "error": "?�큰???�요?�니??}), 401
+            return jsonify({"success": False, "error": "토큰이 필요합니다"}), 401
         
         payload = verify_token(token)
         if not payload:
-            return jsonify({"success": False, "error": "?�효?��? ?��? ?�큰?�니??}), 401
+            return jsonify({"success": False, "error": "유효하지 않은 토큰입니다"}), 401
         
-        # ?�용???�보 조회
-        conn = get_db_connection()
+        # 사용자 정보 조회
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute("SELECT id, email, plan, is_active FROM users WHERE id = ?", (payload['user_id'],))
         user = c.fetchone()
         conn.close()
         
         if not user or not user[3]:
-            return jsonify({"success": False, "error": "비활?�화??계정?�니??}), 401
+            return jsonify({"success": False, "error": "비활성화된 계정입니다"}), 401
         
         request.user = {
             "id": user[0],
@@ -321,7 +235,7 @@ def token_required(f):
 
 
 def optional_token(f):
-    """?�택???�증 ?�코?�이??(비로그인???�용)"""
+    """선택적 인증 데코레이터 (비로그인도 허용)"""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
@@ -335,7 +249,7 @@ def optional_token(f):
         if token:
             payload = verify_token(token)
             if payload:
-                conn = get_db_connection()
+                conn = sqlite3.connect(DB_PATH)
                 c = conn.cursor()
                 c.execute("SELECT id, email, plan FROM users WHERE id = ?", (payload['user_id'],))
                 user = c.fetchone()
@@ -353,24 +267,24 @@ def optional_token(f):
 
 
 # ============================================
-# ?�원가??/ 로그??
+# 회원가입 / 로그인
 # ============================================
 
 def register_user(email: str, password: str, name: str = None) -> dict:
-    """?�원가??""
+    """회원가입"""
     if len(password) < 8:
-        return {"success": False, "error": "비�?번호??8???�상?�어???�니??}
+        return {"success": False, "error": "비밀번호는 8자 이상이어야 합니다"}
     
-    conn = get_db_connection()
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # ?�메??중복 ?�인
+    # 이메일 중복 확인
     c.execute("SELECT id FROM users WHERE email = ?", (email,))
     if c.fetchone():
         conn.close()
-        return {"success": False, "error": "?��? 가?�된 ?�메?�입?�다"}
+        return {"success": False, "error": "이미 가입된 이메일입니다"}
     
-    # ?�용???�성
+    # 사용자 생성
     password_hash = hash_password(password)
     c.execute(
         "INSERT INTO users (email, password_hash, name, plan) VALUES (?, ?, ?, 'free')",
@@ -378,7 +292,7 @@ def register_user(email: str, password: str, name: str = None) -> dict:
     )
     user_id = c.lastrowid
     
-    # ?�늘 ?�용??초기??
+    # 오늘 사용량 초기화
     c.execute(
         "INSERT OR IGNORE INTO usage (user_id, date, generation_count) VALUES (?, DATE('now'), 0)",
         (user_id,)
@@ -387,12 +301,12 @@ def register_user(email: str, password: str, name: str = None) -> dict:
     conn.commit()
     conn.close()
     
-    # ?�큰 발급
+    # 토큰 발급
     token = create_token(user_id, email)
     
     return {
         "success": True,
-        "message": "?�원가?�이 ?�료?�었?�니??,
+        "message": "회원가입이 완료되었습니다",
         "user": {
             "id": user_id,
             "email": email,
@@ -404,8 +318,8 @@ def register_user(email: str, password: str, name: str = None) -> dict:
 
 
 def login_user(email: str, password: str) -> dict:
-    """로그??""
-    conn = get_db_connection()
+    """로그인"""
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     c.execute("SELECT id, email, password_hash, name, plan, is_active FROM users WHERE email = ?", (email,))
@@ -413,27 +327,27 @@ def login_user(email: str, password: str) -> dict:
     
     if not user:
         conn.close()
-        return {"success": False, "error": "?�메???�는 비�?번호가 ?�바르�? ?�습?�다"}
+        return {"success": False, "error": "이메일 또는 비밀번호가 올바르지 않습니다"}
     
     if not user[5]:
         conn.close()
-        return {"success": False, "error": "비활?�화??계정?�니??}
+        return {"success": False, "error": "비활성화된 계정입니다"}
     
     if not verify_password(password, user[2]):
         conn.close()
-        return {"success": False, "error": "?�메???�는 비�?번호가 ?�바르�? ?�습?�다"}
+        return {"success": False, "error": "이메일 또는 비밀번호가 올바르지 않습니다"}
     
-    # 마�?�?로그???�데?�트
+    # 마지막 로그인 업데이트
     c.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", (user[0],))
     conn.commit()
     conn.close()
     
-    # ?�큰 발급
+    # 토큰 발급
     token = create_token(user[0], user[1])
     
     return {
         "success": True,
-        "message": "로그???�공",
+        "message": "로그인 성공",
         "user": {
             "id": user[0],
             "email": user[1],
@@ -445,15 +359,15 @@ def login_user(email: str, password: str) -> dict:
 
 
 # ============================================
-# ?�용??관�?
+# 사용량 관리
 # ============================================
 
 def get_user_usage(user_id: int) -> dict:
-    """?�용???�용??조회"""
-    conn = get_db_connection()
+    """사용자 사용량 조회"""
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # ?�용???�랜 조회
+    # 사용자 플랜 조회
     c.execute("SELECT plan FROM users WHERE id = ?", (user_id,))
     result = c.fetchone()
     if not result:
@@ -463,7 +377,7 @@ def get_user_usage(user_id: int) -> dict:
     plan = result[0]
     plan_info = PLANS.get(plan, PLANS['free'])
     
-    # ?�늘 ?�용??조회
+    # 오늘 사용량 조회
     c.execute(
         "SELECT generation_count FROM usage WHERE user_id = ? AND date = DATE('now')",
         (user_id,)
@@ -471,7 +385,7 @@ def get_user_usage(user_id: int) -> dict:
     result = c.fetchone()
     today_count = result[0] if result else 0
     
-    # �??�성 ??조회
+    # 총 생성 수 조회
     c.execute("SELECT COUNT(*) FROM generations WHERE user_id = ?", (user_id,))
     total_count = c.fetchone()[0]
     
@@ -492,15 +406,15 @@ def get_user_usage(user_id: int) -> dict:
 
 
 def check_can_generate(user_id: int) -> dict:
-    """?�성 가???��? ?�인"""
+    """생성 가능 여부 확인"""
     usage = get_user_usage(user_id)
     if not usage:
-        return {"can_generate": False, "error": "?�용?��? 찾을 ???�습?�다"}
+        return {"can_generate": False, "error": "사용자를 찾을 수 없습니다"}
     
     if not usage['can_generate']:
         return {
             "can_generate": False,
-            "error": f"?�늘??무료 ?�성 ?�수({usage['daily_limit']}??�?모두 ?�용?�습?�다. Pro�??�그?�이?�하?�요!",
+            "error": f"오늘의 무료 생성 횟수({usage['daily_limit']}회)를 모두 사용했습니다. Pro로 업그레이드하세요!",
             "usage": usage
         }
     
@@ -508,11 +422,11 @@ def check_can_generate(user_id: int) -> dict:
 
 
 def increment_usage(user_id: int, action: str = 'generate', prompt: str = None, style: str = None, image_path: str = None):
-    """?�용??증�?"""
-    conn = get_db_connection()
+    """사용량 증가"""
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # ?�늘 ?�용??증�? (?�으�??�성)
+    # 오늘 사용량 증가 (없으면 생성)
     c.execute('''
         INSERT INTO usage (user_id, date, generation_count) 
         VALUES (?, DATE('now'), 1)
@@ -520,7 +434,7 @@ def increment_usage(user_id: int, action: str = 'generate', prompt: str = None, 
         DO UPDATE SET generation_count = generation_count + 1
     ''', (user_id,))
     
-    # ?�성 기록 ?�??
+    # 생성 기록 저장
     if prompt or action:
         c.execute(
             "INSERT INTO generations (user_id, prompt, style, image_path) VALUES (?, ?, ?, ?)",
@@ -532,22 +446,22 @@ def increment_usage(user_id: int, action: str = 'generate', prompt: str = None, 
 
 
 # ============================================
-# 구독 관�?
+# 구독 관리
 # ============================================
 
 def update_user_plan(user_id: int, plan: str, payment_key: str = None, order_id: str = None):
-    """?�용???�랜 ?�데?�트"""
+    """사용자 플랜 업데이트"""
     if plan not in PLANS:
-        return {"success": False, "error": "?�효?��? ?��? ?�랜?�니??}
+        return {"success": False, "error": "유효하지 않은 플랜입니다"}
     
-    conn = get_db_connection()
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # ?�용???�랜 ?�데?�트
+    # 사용자 플랜 업데이트
     c.execute("UPDATE users SET plan = ? WHERE id = ?", (plan, user_id))
     
-    # 구독 기록 추�?
-    expires_at = datetime.now() + timedelta(days=30)  # 30??구독
+    # 구독 기록 추가
+    expires_at = datetime.now() + timedelta(days=30)  # 30일 구독
     c.execute('''
         INSERT INTO subscriptions (user_id, plan, status, expires_at, payment_key, order_id)
         VALUES (?, ?, 'active', ?, ?, ?)
@@ -556,12 +470,12 @@ def update_user_plan(user_id: int, plan: str, payment_key: str = None, order_id:
     conn.commit()
     conn.close()
     
-    return {"success": True, "message": f"{PLANS[plan]['name']} ?�랜?�로 ?�그?�이?�되?�습?�다"}
+    return {"success": True, "message": f"{PLANS[plan]['name']} 플랜으로 업그레이드되었습니다"}
 
 
 def get_subscription_status(user_id: int) -> dict:
-    """구독 ?�태 조회"""
-    conn = get_db_connection()
+    """구독 상태 조회"""
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     c.execute('''
@@ -577,7 +491,7 @@ def get_subscription_status(user_id: int) -> dict:
     if not sub:
         return {"active": False, "plan": "free"}
     
-    # 만료 ?�인
+    # 만료 확인
     expires_at = datetime.fromisoformat(sub[3]) if sub[3] else None
     is_expired = expires_at and datetime.now() > expires_at
     
@@ -591,5 +505,5 @@ def get_subscription_status(user_id: int) -> dict:
     }
 
 
-# 초기??
+# 초기화
 init_db()
