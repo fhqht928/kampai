@@ -375,21 +375,48 @@ def token_required(f):
         conn = get_db_connection()
         c = conn.cursor()
         ph = get_placeholder()
-        c.execute(f"SELECT id, email, plan, is_active FROM users WHERE id = {ph}", (payload['user_id'],))
+        c.execute(f"SELECT id, email, plan, is_active, plan_expires FROM users WHERE id = {ph}", (payload['user_id'],))
         user = c.fetchone()
-        conn.close()
         
         if not user:
+            conn.close()
             return jsonify({"success": False, "error": "사용자를 찾을 수 없습니다"}), 401
         
         # Row 객체에서 값 추출
         if IS_POSTGRES:
-            user_id, email, plan, is_active = user
+            user_id, email, plan, is_active, plan_expires = user
         else:
-            user_id, email, plan, is_active = user['id'], user['email'], user['plan'], user['is_active']
+            user_id, email, plan, is_active, plan_expires = user['id'], user['email'], user['plan'], user['is_active'], user['plan_expires']
         
         if not is_active:
+            conn.close()
             return jsonify({"success": False, "error": "비활성화된 계정입니다"}), 401
+        
+        # 구독 만료 체크 - 만료된 유료 플랜을 free로 전환
+        if plan != 'free' and plan_expires:
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            
+            # plan_expires를 datetime으로 변환
+            if isinstance(plan_expires, str):
+                expires_dt = datetime.fromisoformat(plan_expires.replace('Z', '+00:00'))
+            else:
+                expires_dt = plan_expires
+                if expires_dt.tzinfo is None:
+                    expires_dt = expires_dt.replace(tzinfo=timezone.utc)
+            
+            # 구독 상태 확인 (cancelled인 경우만 만료 시 free로 전환)
+            c.execute(f"SELECT status FROM subscriptions WHERE user_id = {ph} ORDER BY created_at DESC LIMIT 1", (user_id,))
+            sub_result = c.fetchone()
+            sub_status = (sub_result[0] if IS_POSTGRES else sub_result['status']) if sub_result else None
+            
+            if sub_status == 'cancelled' and now >= expires_dt:
+                # 만료됨 - free로 전환
+                c.execute(f"UPDATE users SET plan = 'free', plan_expires = NULL WHERE id = {ph}", (user_id,))
+                conn.commit()
+                plan = 'free'
+        
+        conn.close()
         
         request.user = {
             "id": user_id,
@@ -766,35 +793,47 @@ def get_subscription_status(user_id: int) -> dict:
 
 
 def cancel_subscription(user_id: int) -> dict:
-    """구독 취소 (Free 플랜으로 다운그레이드)"""
+    """구독 취소 (결제 기간 종료 후 Free 플랜으로 전환 예약)"""
     conn = get_db_connection()
     c = conn.cursor()
     ph = get_placeholder()
     
     try:
-        # 현재 플랜 확인
-        c.execute(f"SELECT plan FROM users WHERE id = {ph}", (user_id,))
+        # 현재 플랜과 만료일 확인
+        c.execute(f"SELECT plan, plan_expires FROM users WHERE id = {ph}", (user_id,))
         result = c.fetchone()
         if not result:
             conn.close()
             return {"success": False, "error": "사용자를 찾을 수 없습니다"}
         
-        current_plan = result[0] if IS_POSTGRES else result['plan']
+        if IS_POSTGRES:
+            current_plan = result[0]
+            plan_expires = result[1]
+        else:
+            current_plan = result['plan']
+            plan_expires = result['plan_expires']
         
         if current_plan == 'free':
             conn.close()
             return {"success": False, "error": "이미 무료 플랜입니다"}
         
-        # 플랜을 free로 변경
-        c.execute(f"UPDATE users SET plan = 'free', plan_expires = NULL WHERE id = {ph}", (user_id,))
-        
-        # 구독 상태도 비활성화
+        # 구독 상태를 'cancelled'로 변경 (플랜은 유지, 만료일까지 사용 가능)
         c.execute(f"UPDATE subscriptions SET status = 'cancelled' WHERE user_id = {ph} AND status = 'active'", (user_id,))
         
         conn.commit()
         conn.close()
         
-        return {"success": True, "message": "구독이 취소되었습니다. 무료 플랜으로 변경되었습니다."}
+        # 만료일 정보 반환
+        expires_msg = ""
+        if plan_expires:
+            from datetime import datetime
+            if isinstance(plan_expires, str):
+                expires_date = datetime.fromisoformat(plan_expires.replace('Z', '+00:00'))
+            else:
+                expires_date = plan_expires
+            expires_msg = f" {expires_date.strftime('%Y년 %m월 %d일')}까지 현재 플랜을 이용하실 수 있습니다."
+        
+        return {"success": True, "message": f"구독이 취소되었습니다.{expires_msg}", "plan_expires": str(plan_expires) if plan_expires else None}
     except Exception as e:
         conn.close()
         return {"success": False, "error": f"구독 취소 중 오류: {str(e)}"}

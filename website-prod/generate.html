@@ -2914,7 +2914,7 @@
         
         // 구독 취소
         async function cancelSubscription() {
-            if (!confirm('정말 구독을 취소하시겠습니까?\n무료 플랜으로 변경됩니다.')) {
+            if (!confirm('정말 구독을 취소하시겠습니까?\n취소 후 다음 결제일까지는 서비스를 계속 이용할 수 있습니다.')) {
                 return;
             }
             
@@ -2930,11 +2930,10 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast('구독이 취소되었습니다', 'success');
-                    authState.subscription.plan = 'free';
-                    if (authState.user) authState.user.plan = 'free';
-                    localStorage.setItem('kampai_user', JSON.stringify(authState.user));
+                    showToast(data.message || '구독이 취소되었습니다. 다음 결제일까지 이용 가능합니다.', 'success');
                     closeAccountModal();
+                    // 최신 상태 반영을 위해 구독 정보 다시 불러오기
+                    await loadSubscriptionStatus();
                     updateAuthUI();
                 } else {
                     showToast(data.error || '구독 취소 실패', 'error');

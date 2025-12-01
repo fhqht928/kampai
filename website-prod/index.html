@@ -650,7 +650,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="terms" required class="w-4 h-4">
-                    <label for="terms" class="text-sm text-gray-600"><a href="terms.html" target="_blank" class="text-primary-600">이용약관</a> 및 <a href="privacy.html" target="_blank" class="text-primary-600">개인정보처리방침</a>에 동의합니다</label>
+                    <label for="terms" class="text-sm text-gray-600"><a href="terms.html" target="_blank" onclick="event.stopPropagation()" class="text-primary-600 underline">이용약관</a> 및 <a href="privacy.html" target="_blank" onclick="event.stopPropagation()" class="text-primary-600 underline">개인정보처리방침</a>에 동의합니다</label>
                 </div>
                 <button type="submit" class="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 transition">
                     가입하기
@@ -846,11 +846,9 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('구독이 취소되었습니다.\\n다음 결제일까지 서비스를 이용하실 수 있습니다.');
-                    // 사용자 정보 갱신
-                    currentUser.plan = 'free';
-                    localStorage.setItem('kampai_user', JSON.stringify(currentUser));
+                    alert(data.message || '구독이 취소되었습니다.\\n다음 결제일까지 서비스를 이용하실 수 있습니다.');
                     closeAccountModal();
+                    // 페이지 새로고침하여 최신 상태 반영
                     location.reload();
                 } else {
                     alert(data.error || '구독 취소에 실패했습니다.');
