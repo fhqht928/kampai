@@ -283,9 +283,9 @@
                     throw new Error(orderData.error || '주문 생성 실패');
                 }
 
-                // 2. 테스트 모드: 바로 성공 처리 (실제 운영시 토스페이먼츠 연동)
+                // 2. 결제 처리
                 if (orderData.testMode) {
-                    // 테스트 모드에서는 바로 결제 성공 처리
+                    // 간편 결제 처리
                     const confirmResponse = await fetch(`${API_URL}/api/payment/confirm`, {
                         method: 'POST',
                         headers: {

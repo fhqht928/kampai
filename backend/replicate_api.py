@@ -184,7 +184,6 @@ class ReplicateClient:
         
         # aspect ratio 계산
         aspect_ratio = self._get_aspect_ratio(width, height)
-        print(f"[Replicate] width={width}, height={height}, aspect_ratio={aspect_ratio}, model={model_key}")
         
         # Qwen-Image 모델 파라미터
         if "qwen" in model_key:

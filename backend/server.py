@@ -568,8 +568,6 @@ def generate_with_replicate_api(prompt: str, plan: str, width: int, height: int,
     try:
         from replicate_api import PLAN_AVAILABLE_MODELS
         
-        print(f"[generate] plan={plan}, width={width}, height={height}, model={selected_model}")
-        
         # Replicate API 상태 확인
         status = check_replicate_status()
         if not status.get("available"):
@@ -588,15 +586,11 @@ def generate_with_replicate_api(prompt: str, plan: str, width: int, height: int,
         plan_info = PLANS.get(plan, PLANS["free"])
         available_models = PLAN_AVAILABLE_MODELS.get(plan, ["flux-schnell"])
         
-        print(f"[generate] plan_info={plan_info.get('name')}, available_models={available_models}")
-        
         # 사용자가 모델을 선택한 경우 (Pro/Business)
         if selected_model and selected_model in available_models:
             model_key = selected_model
         else:
             model_key = plan_info.get("model", "flux-schnell")
-        
-        print(f"[generate] selected model_key={model_key}")
         
         # 이미지 편집/레퍼런스 모드는 FLUX 2 Pro만 지원
         if (edit_mode or reference_mode) and input_image:
@@ -621,8 +615,6 @@ def generate_with_replicate_api(prompt: str, plan: str, width: int, height: int,
         if reference_mode and input_image:
             final_prompt = f"{prompt}, using the elements from the reference image"
         
-        print(f"[generate] Calling replicate_client.generate_image with model={model_key}")
-        
         # Replicate로 생성/편집
         result = replicate_client.generate_image(
             prompt=final_prompt,
@@ -632,8 +624,6 @@ def generate_with_replicate_api(prompt: str, plan: str, width: int, height: int,
             input_image=input_image if (edit_mode or reference_mode) else None,
             edit_prompt=final_prompt if (edit_mode or reference_mode) else None
         )
-        
-        print(f"[generate] Replicate result: success={result.get('success')}, error={result.get('error')}")
         
         if result.get("success"):
             return jsonify({
@@ -655,7 +645,6 @@ def generate_with_replicate_api(prompt: str, plan: str, width: int, height: int,
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(f"[generate] Exception in generate_with_replicate_api: {str(e)}")
         return jsonify({
             "success": False,
             "error": f"이미지 생성 중 오류: {str(e)}",
