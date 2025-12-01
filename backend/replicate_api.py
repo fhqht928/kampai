@@ -311,38 +311,35 @@ class ReplicateClient:
     def _get_aspect_ratio(self, width: int, height: int, model_key: str = "flux-schnell") -> str:
         """
         너비/높이를 aspect ratio 문자열로 변환
-        각 모델마다 지원하는 비율이 다름
         
-        FLUX Schnell 지원: 1:1, 16:9, 9:16, 21:9, 9:21, 4:3, 3:4, 4:5, 5:4, 3:2, 2:3
-        Qwen-Image 지원: 1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3
+        FLUX Schnell/Pro 지원 비율:
+        - 1:1, 16:9, 21:9, 2:3, 3:2, 4:5, 5:4, 9:16, 9:21
+        
+        주의: 4:3, 3:4는 지원되지 않음!
         """
         ratio = width / height
         
         # 가로 비율 (width > height)
-        if ratio > 2.0:
-            return "21:9"  # 울트라와이드
-        elif ratio > 1.6:
-            return "16:9"  # 와이드스크린
-        elif ratio > 1.4:
-            return "3:2"   # 표준 가로
-        elif ratio > 1.2:
-            return "4:3"   # 클래식 가로
-        elif ratio > 1.1:
-            return "5:4"   # 거의 정사각
+        if ratio >= 2.1:      # 2.33:1 이상
+            return "21:9"     # 울트라와이드 (2.33:1)
+        elif ratio >= 1.6:    # 1.78:1 이상
+            return "16:9"     # 와이드스크린 (1.78:1)
+        elif ratio >= 1.4:    # 1.5:1 이상
+            return "3:2"      # 표준 가로 (1.5:1)
+        elif ratio >= 1.15:   # 1.25:1 이상
+            return "5:4"      # 거의 정사각 (1.25:1)
         # 정사각형
-        elif ratio > 0.9:
-            return "1:1"
+        elif ratio >= 0.85:   # 0.85~1.15
+            return "1:1"      # 정사각형 (1:1)
         # 세로 비율 (height > width)
-        elif ratio > 0.8:
-            return "4:5"   # 거의 정사각
-        elif ratio > 0.7:
-            return "3:4"   # 클래식 세로
-        elif ratio > 0.6:
-            return "2:3"   # 표준 세로
-        elif ratio > 0.5:
-            return "9:16"  # 세로 와이드 (모바일)
-        else:
-            return "9:21"  # 울트라 세로
+        elif ratio >= 0.75:   # 0.8:1 이상
+            return "4:5"      # 거의 정사각 (0.8:1)
+        elif ratio >= 0.6:    # 0.67:1 이상
+            return "2:3"      # 표준 세로 (0.67:1)
+        elif ratio >= 0.45:   # 0.56:1 이상
+            return "9:16"     # 세로 와이드 (0.56:1)
+        else:                 # 0.43:1 이하
+            return "9:21"     # 울트라 세로 (0.43:1)
     
     def _wait_for_completion(self, prediction_id: str, timeout: int = 120) -> Dict:
         """Prediction 완료까지 대기"""
