@@ -132,23 +132,71 @@ def health_check():
 
 
 # ============================================
-# MyMemory 한글 → 영어 번역 API (무료)
+# 한글 → 영어 번역 API (다중 폴백)
+# 1순위: MyMemory (1000회/일)
+# 2순위: LibreTranslate (무제한)
+# 3순위: 사전 기반 (로컬)
 # ============================================
+
+def translate_with_mymemory(text):
+    """MyMemory API로 번역 (1000회/일 무료)"""
+    response = requests.get(
+        "https://api.mymemory.translated.net/get",
+        params={"q": text, "langpair": "ko|en"},
+        timeout=10
+    )
+    if response.status_code == 200:
+        data = response.json()
+        if data.get("responseStatus") == 200:
+            translated = data["responseData"]["translatedText"]
+            # 한도 초과 메시지 체크
+            if "MYMEMORY WARNING" in translated.upper() or "LIMIT" in translated.upper():
+                raise Exception("MyMemory limit exceeded")
+            return translated
+    raise Exception("MyMemory failed")
+
+
+def translate_with_libretranslate(text):
+    """LibreTranslate API로 번역 (무제한 무료)"""
+    # 공개 LibreTranslate 서버 목록 (하나 실패 시 다음 시도)
+    servers = [
+        "https://libretranslate.com/translate",
+        "https://translate.argosopentech.com/translate",
+        "https://translate.terraprint.co/translate"
+    ]
+    
+    for server in servers:
+        try:
+            response = requests.post(
+                server,
+                json={
+                    "q": text,
+                    "source": "ko",
+                    "target": "en",
+                    "format": "text"
+                },
+                headers={"Content-Type": "application/json"},
+                timeout=15
+            )
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("translatedText", "")
+        except:
+            continue
+    raise Exception("All LibreTranslate servers failed")
+
 
 @app.route('/api/translate', methods=['POST'])
 def translate_prompt():
     """
-    한글 프롬프트를 MyMemory API로 영어로 번역 (하루 1000회 무료)
+    한글 프롬프트를 영어로 번역 (다중 폴백 시스템)
     """
     data = request.json
     korean_text = data.get("text", "").strip()
-    style = data.get("style", "")  # 선택된 스타일 프리셋
+    style = data.get("style", "")
     
     if not korean_text:
-        return jsonify({
-            "success": False,
-            "error": "텍스트를 입력해주세요."
-        }), 400
+        return jsonify({"success": False, "error": "텍스트를 입력해주세요."}), 400
     
     # 스타일 키워드
     style_keywords = {
@@ -164,80 +212,68 @@ def translate_prompt():
     }
     
     style_prefix = style_keywords.get(style.lower(), "") if style else ""
+    translated = None
+    model_used = None
     
+    # 1순위: MyMemory
     try:
-        # MyMemory 무료 번역 API 사용
-        response = requests.get(
-            f"https://api.mymemory.translated.net/get",
-            params={
-                "q": korean_text,
-                "langpair": "ko|en"
-            },
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("responseStatus") == 200:
-                translated = data["responseData"]["translatedText"]
-            else:
-                raise Exception("MyMemory API error")
-        else:
-            raise Exception(f"API error: {response.status_code}")
-        
-        # 불필요한 문자 정리
-        translated = translated.strip('"\'')
-        
-        # 스타일 키워드 추가
-        if style_prefix:
-            translated = f"{style_prefix}, {translated}, masterpiece, best quality"
-        else:
-            translated = f"{translated}, high quality, detailed"
-        
-        return jsonify({
-            "success": True,
-            "original": korean_text,
-            "translated": translated,
-            "model": "mymemory",
-            "style_applied": style if style else "none"
-        })
-            
-    except Exception as e:
-        # 폴백: 개발 환경에서 Ollama 사용 시도
-        if not IS_PRODUCTION:
-            try:
-                resp = requests.get(f"{OLLAMA_URL}/api/tags", timeout=2)
-                if resp.status_code == 200:
-                    response = requests.post(
-                        f"{OLLAMA_URL}/api/generate",
-                        json={
-                            "model": "llama3.1:8b",
-                            "prompt": f"Translate to English (short, 15-30 words): {korean_text}",
-                            "stream": False,
-                            "options": {"temperature": 0.7, "num_predict": 100}
-                        },
-                        timeout=30
-                    )
-                    if response.status_code == 200:
-                        translated = response.json().get("response", "").strip().strip('"\'')
-                        if style_prefix:
-                            translated = f"{style_prefix}, {translated}, masterpiece, best quality"
-                        else:
-                            translated = f"{translated}, high quality, detailed"
-                        return jsonify({
-                            "success": True,
-                            "original": korean_text,
-                            "translated": translated,
-                            "model": "ollama",
-                            "style_applied": style if style else "none"
-                        })
-            except:
-                pass
-        
+        translated = translate_with_mymemory(korean_text)
+        model_used = "mymemory"
+    except:
+        pass
+    
+    # 2순위: LibreTranslate
+    if not translated:
+        try:
+            translated = translate_with_libretranslate(korean_text)
+            model_used = "libretranslate"
+        except:
+            pass
+    
+    # 3순위: 개발 환경에서 Ollama
+    if not translated and not IS_PRODUCTION:
+        try:
+            resp = requests.get(f"{OLLAMA_URL}/api/tags", timeout=2)
+            if resp.status_code == 200:
+                response = requests.post(
+                    f"{OLLAMA_URL}/api/generate",
+                    json={
+                        "model": "llama3.1:8b",
+                        "prompt": f"Translate to English (short): {korean_text}",
+                        "stream": False,
+                        "options": {"temperature": 0.7, "num_predict": 100}
+                    },
+                    timeout=30
+                )
+                if response.status_code == 200:
+                    translated = response.json().get("response", "").strip().strip('"\'')
+                    model_used = "ollama"
+        except:
+            pass
+    
+    # 번역 실패
+    if not translated:
         return jsonify({
             "success": False,
-            "error": f"번역 오류: {str(e)}"
-        }), 500
+            "error": "번역 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해주세요."
+        }), 503
+    
+    # 불필요한 문자 정리
+    translated = translated.strip('"\'')
+    
+    # 스타일 키워드 추가
+    if style_prefix:
+        translated = f"{style_prefix}, {translated}, masterpiece, best quality"
+    else:
+        translated = f"{translated}, high quality, detailed"
+    
+    return jsonify({
+        "success": True,
+        "original": korean_text,
+        "translated": translated,
+        "model": model_used,
+        "style_applied": style if style else "none"
+    })
 
 
 @app.route('/api/quote', methods=['POST'])
