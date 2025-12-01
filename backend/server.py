@@ -565,81 +565,100 @@ def generate_with_comfyui(prompt: str, img_type: str, width: int, height: int):
 
 def generate_with_replicate_api(prompt: str, plan: str, width: int, height: int, selected_model: str = None, input_image: str = None, edit_mode: bool = False, reference_mode: bool = False):
     """프로덕션용: Replicate API로 이미지 생성, 편집, 또는 레퍼런스 기반 생성"""
-    from replicate_api import PLAN_AVAILABLE_MODELS
-    
-    # Replicate API 상태 확인
-    status = check_replicate_status()
-    if not status.get("available"):
-        # 폴백: ComfyUI 시도
-        comfy = ComfyUIClient()
-        if comfy.is_server_running():
-            return generate_with_comfyui(prompt, "custom", width, height)
+    try:
+        from replicate_api import PLAN_AVAILABLE_MODELS
         
+        print(f"[generate] plan={plan}, width={width}, height={height}, model={selected_model}")
+        
+        # Replicate API 상태 확인
+        status = check_replicate_status()
+        if not status.get("available"):
+            # 폴백: ComfyUI 시도
+            comfy = ComfyUIClient()
+            if comfy.is_server_running():
+                return generate_with_comfyui(prompt, "custom", width, height)
+            
+            return jsonify({
+                "success": False,
+                "error": f"이미지 생성 서비스 이용 불가: {status.get('message')}",
+                "mode": "production"
+            }), 503
+        
+        # 플랜에 맞는 모델 선택
+        plan_info = PLANS.get(plan, PLANS["free"])
+        available_models = PLAN_AVAILABLE_MODELS.get(plan, ["flux-schnell"])
+        
+        print(f"[generate] plan_info={plan_info.get('name')}, available_models={available_models}")
+        
+        # 사용자가 모델을 선택한 경우 (Pro/Business)
+        if selected_model and selected_model in available_models:
+            model_key = selected_model
+        else:
+            model_key = plan_info.get("model", "flux-schnell")
+        
+        print(f"[generate] selected model_key={model_key}")
+        
+        # 이미지 편집/레퍼런스 모드는 FLUX 2 Pro만 지원
+        if (edit_mode or reference_mode) and input_image:
+            if model_key != "flux-2-pro":
+                if "flux-2-pro" in available_models:
+                    model_key = "flux-2-pro"
+                else:
+                    return jsonify({
+                        "success": False,
+                        "error": "이미지 편집/레퍼런스 기능은 Pro/Business 플랜의 FLUX 2 Pro 모델에서만 사용 가능합니다.",
+                        "mode": "production"
+                    }), 403
+        
+        # 해상도 제한 적용
+        max_res_str = plan_info.get("resolution", "1024x1024")
+        max_res = int(max_res_str.split("x")[0])
+        width = min(width, max_res)
+        height = min(height, max_res)
+        
+        # 레퍼런스 모드: 프롬프트에 참조 힌트 추가
+        final_prompt = prompt
+        if reference_mode and input_image:
+            final_prompt = f"{prompt}, using the elements from the reference image"
+        
+        print(f"[generate] Calling replicate_client.generate_image with model={model_key}")
+        
+        # Replicate로 생성/편집
+        result = replicate_client.generate_image(
+            prompt=final_prompt,
+            model_key=model_key,
+            width=width,
+            height=height,
+            input_image=input_image if (edit_mode or reference_mode) else None,
+            edit_prompt=final_prompt if (edit_mode or reference_mode) else None
+        )
+        
+        print(f"[generate] Replicate result: success={result.get('success')}, error={result.get('error')}")
+        
+        if result.get("success"):
+            return jsonify({
+                "success": True,
+                "images": result["images"],
+                "count": len(result["images"]),
+                "mode": "production",
+                "engine": result.get("model", "Replicate"),
+                "time_taken": result.get("time_taken"),
+                "model": result.get("model_key")
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": result.get("error", "이미지 생성 실패"),
+                "mode": "production"
+            }), 500
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"[generate] Exception in generate_with_replicate_api: {str(e)}")
         return jsonify({
             "success": False,
-            "error": f"이미지 생성 서비스 이용 불가: {status.get('message')}",
-            "mode": "production"
-        }), 503
-    
-    # 플랜에 맞는 모델 선택
-    plan_info = PLANS.get(plan, PLANS["free"])
-    available_models = PLAN_AVAILABLE_MODELS.get(plan, ["flux-schnell"])
-    
-    # 사용자가 모델을 선택한 경우 (Pro/Business)
-    if selected_model and selected_model in available_models:
-        model_key = selected_model
-    else:
-        model_key = plan_info.get("model", "flux-schnell")
-    
-    # 이미지 편집/레퍼런스 모드는 FLUX 2 Pro만 지원
-    if (edit_mode or reference_mode) and input_image:
-        if model_key != "flux-2-pro":
-            if "flux-2-pro" in available_models:
-                model_key = "flux-2-pro"
-            else:
-                return jsonify({
-                    "success": False,
-                    "error": "이미지 편집/레퍼런스 기능은 Pro/Business 플랜의 FLUX 2 Pro 모델에서만 사용 가능합니다.",
-                    "mode": "production"
-                }), 403
-    
-    # 해상도 제한 적용
-    max_res_str = plan_info.get("resolution", "1024x1024")
-    max_res = int(max_res_str.split("x")[0])
-    width = min(width, max_res)
-    height = min(height, max_res)
-    
-    # 레퍼런스 모드: 프롬프트에 참조 힌트 추가
-    final_prompt = prompt
-    if reference_mode and input_image:
-        # 프롬프트에 이미지 참조 힌트 추가
-        # FLUX 2 Pro는 "the outfit/style/element from the reference image" 형태로 참조
-        final_prompt = f"{prompt}, using the elements from the reference image"
-    
-    # Replicate로 생성/편집
-    result = replicate_client.generate_image(
-        prompt=final_prompt,
-        model_key=model_key,
-        width=width,
-        height=height,
-        input_image=input_image if (edit_mode or reference_mode) else None,
-        edit_prompt=final_prompt if (edit_mode or reference_mode) else None
-    )
-    
-    if result.get("success"):
-        return jsonify({
-            "success": True,
-            "images": result["images"],
-            "count": len(result["images"]),
-            "mode": "production",
-            "engine": result.get("model", "Replicate"),
-            "time_taken": result.get("time_taken"),
-            "model": result.get("model_key")
-        })
-    else:
-        return jsonify({
-            "success": False,
-            "error": result.get("error", "이미지 생성 실패"),
+            "error": f"이미지 생성 중 오류: {str(e)}",
             "mode": "production"
         }), 500
 
