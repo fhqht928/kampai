@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kampai - AI ?��?지 ?�성</title>
+    <title>Kampai - AI 이미지 생성</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -31,7 +31,7 @@
             overflow-x: hidden;
         }
 
-        /* 배경 ?�니메이??*/
+        /* 배경 애니메이션 */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -50,7 +50,7 @@
             50% { opacity: 0.7; }
         }
 
-        /* ?�더 */
+        /* 헤더 */
         header {
             padding: 15px 30px;
             display: flex;
@@ -198,7 +198,7 @@
             box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
         }
 
-        /* 마이?�이지 모달 */
+        /* 마이페이지 모달 */
         .account-modal-overlay {
             display: none;
             position: fixed;
@@ -274,7 +274,7 @@
             border-color: #ef4444;
         }
 
-        /* 메인 ?�이?�웃 */
+        /* 메인 레이아웃 */
         .main-container {
             display: grid;
             grid-template-columns: 380px 1fr;
@@ -287,7 +287,7 @@
             }
         }
 
-        /* ?�이?�바 */
+        /* 사이드바 */
         .sidebar {
             background: rgba(0,0,0,0.4);
             border-right: 1px solid var(--glass-border);
@@ -305,7 +305,7 @@
             border-radius: 3px;
         }
 
-        /* ?�션 */
+        /* 섹션 */
         .section {
             margin-bottom: 25px;
         }
@@ -322,7 +322,7 @@
             letter-spacing: 1px;
         }
 
-        /* 모드 ??*/
+        /* 모드 탭 */
         .mode-tabs {
             display: flex;
             gap: 8px;
@@ -359,7 +359,7 @@
             margin-bottom: 5px;
         }
 
-        /* Pro 배�? ?��???*/
+        /* Pro 배지 스타일 */
         .pro-badge {
             display: inline-block;
             background: linear-gradient(135deg, #FFD700, #FFA500);
@@ -379,7 +379,7 @@
         }
 
         .mode-tab.locked::after {
-            content: '?��';
+            content: '🔒';
             position: absolute;
             top: 8px;
             right: 8px;
@@ -390,7 +390,7 @@
             border-color: rgba(255, 165, 0, 0.5);
         }
 
-        /* ?��?지 ?�로???�역 */
+        /* 이미지 업로드 영역 */
         .upload-zone {
             border: 2px dashed rgba(255,255,255,0.15);
             border-radius: 16px;
@@ -406,7 +406,7 @@
             display: block;
         }
 
-        /* Try-On ?�용 ?�로???�역 */
+        /* Try-On 전용 업로드 영역 */
         .tryon-zone {
             display: flex !important;
             flex-direction: column;
@@ -484,7 +484,7 @@
             font-size: 1rem;
         }
 
-        /* AI 모델 ?�택 */
+        /* AI 모델 선택 */
         .model-select-section {
             margin-bottom: 20px;
         }
@@ -547,7 +547,7 @@
             color: var(--primary);
         }
 
-        /* ?��????�리??*/
+        /* 스타일 프리셋 */
         .style-presets {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -603,7 +603,7 @@
             z-index: 1;
         }
 
-        /* ?�롬?�트 빌더 */
+        /* 프롬프트 빌더 */
         .prompt-builder {
             background: rgba(0,0,0,0.3);
             border-radius: 12px;
@@ -649,7 +649,7 @@
             color: #fff;
         }
 
-        /* ?�롬?�트 ?�력 */
+        /* 프롬프트 입력 */
         .prompt-input-container {
             position: relative;
         }
@@ -690,7 +690,7 @@
             font-weight: 700;
         }
 
-        /* AI 최적??버튼 */
+        /* AI 최적화 버튼 */
         .optimize-btn {
             width: 100%;
             padding: 12px;
@@ -718,7 +718,7 @@
             cursor: not-allowed;
         }
 
-        /* 최적?�된 ?�롬?�트 ?�시 */
+        /* 최적화된 프롬프트 표시 */
         .optimized-prompt {
             background: rgba(0, 255, 136, 0.1);
             border: 1px solid rgba(0, 255, 136, 0.3);
@@ -745,7 +745,7 @@
             line-height: 1.4;
         }
 
-        /* ?�이�??�션 */
+        /* 사이즈 옵션 */
         .size-presets {
             display: flex;
             gap: 8px;
@@ -774,7 +774,7 @@
             color: #fff;
         }
 
-        /* 멀???�이�??��? */
+        /* 멀티 사이즈 토글 */
         .multi-size-toggle {
             display: flex;
             align-items: center;
@@ -820,7 +820,7 @@
             color: rgba(255,255,255,0.8);
         }
 
-        /* ?�성 버튼 */
+        /* 생성 버튼 */
         .generate-btn {
             width: 100%;
             padding: 18px;
@@ -882,14 +882,14 @@
             to { transform: rotate(360deg); }
         }
 
-        /* 메인 콘텐�??�역 */
+        /* 메인 콘텐츠 영역 */
         .main-content {
             padding: 25px;
             display: flex;
             flex-direction: column;
         }
 
-        /* 결과 ?�더 */
+        /* 결과 헤더 */
         .result-header {
             display: flex;
             justify-content: space-between;
@@ -946,7 +946,7 @@
             50% { transform: scale(1.3); opacity: 0.7; }
         }
 
-        /* ?�로그레??*/
+        /* 프로그레스 */
         .progress-section {
             background: rgba(0,0,0,0.3);
             border-radius: 12px;
@@ -987,7 +987,7 @@
             100% { background-position: 200% 50%; }
         }
 
-        /* 결과 그리??*/
+        /* 결과 그리드 */
         .result-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1083,7 +1083,7 @@
             inset: 8px;
         }
 
-        /* ?��?지 ?�버?�이 */
+        /* 이미지 오버레이 */
         .image-overlay {
             position: absolute;
             inset: 0;
@@ -1128,7 +1128,7 @@
             border-color: var(--primary);
         }
 
-        /* ??�� 버튼 */
+        /* 삭제 버튼 */
         .delete-btn {
             position: absolute;
             top: 10px;
@@ -1158,7 +1158,7 @@
             transform: scale(1.1);
         }
 
-        /* ?�스?�리 ?�션 */
+        /* 히스토리 섹션 */
         .history-section {
             margin-top: 30px;
             padding-top: 30px;
@@ -1209,7 +1209,7 @@
             color: rgba(255,255,255,0.4);
         }
 
-        /* 결과 카드 ?�보 */
+        /* 결과 카드 정보 */
         .result-info {
             padding: 12px 15px;
         }
@@ -1226,7 +1226,7 @@
             font-weight: 600;
         }
 
-        /* Before/After ?�라?�더 */
+        /* Before/After 슬라이더 */
         .compare-slider {
             position: relative;
             width: 100%;
@@ -1263,7 +1263,7 @@
         }
 
         .compare-slider .slider-handle::before {
-            content: '?�??;
+            content: '◀▶';
             position: absolute;
             top: 50%;
             left: 50%;
@@ -1276,7 +1276,7 @@
             white-space: nowrap;
         }
 
-        /* ?�스??*/
+        /* 토스트 */
         .toast-container {
             position: fixed;
             bottom: 20px;
@@ -1305,7 +1305,7 @@
         .toast.success { border-color: var(--success); }
         .toast.error { border-color: var(--accent); }
 
-        /* ?�든 ?�일 ?�풋 */
+        /* 히든 파일 인풋 */
         #fileInput {
             display: none;
         }
@@ -1314,17 +1314,17 @@
 <body>
     <div class="bg-animation"></div>
 
-    <!-- ?�더 -->
+    <!-- 헤더 -->
     <header>
         <div class="logo">
-            <a href="index.html" class="logo-icon">?��</a>
+            <a href="index.html" class="logo-icon">🍺</a>
             <a href="index.html" class="logo-text">Kampai</a>
         </div>
         <div class="header-right">
             <div id="authBadge" class="auth-badge">
                 <span class="auth-status guest">
-                    <span>?��</span>
-                    <span>로딩 �?..</span>
+                    <span>👤</span>
+                    <span>로딩 중...</span>
                 </span>
             </div>
             <div class="model-info">
@@ -1335,200 +1335,200 @@
     </header>
 
     <div class="main-container">
-        <!-- ?�이?�바 -->
+        <!-- 사이드바 -->
         <aside class="sidebar">
-            <!-- 모드 ?�택 -->
+            <!-- 모드 선택 -->
             <div class="mode-tabs">
                 <div class="mode-tab active" data-mode="create">
-                    <span class="icon">??/span>
-                    <span>?�로 ?�성</span>
+                    <span class="icon">✨</span>
+                    <span>새로 생성</span>
                 </div>
                 <div class="mode-tab" data-mode="transform" id="transformTab">
-                    <span class="icon">?��</span>
-                    <span>?��?지 ?�집</span>
+                    <span class="icon">🔄</span>
+                    <span>이미지 편집</span>
                     <span class="pro-badge" id="transformProBadge">Pro</span>
                 </div>
                 <div class="mode-tab" data-mode="tryon" id="tryonTab">
-                    <span class="icon">?��</span>
-                    <span>AI ?�팅</span>
+                    <span class="icon">👗</span>
+                    <span>AI 피팅</span>
                     <span class="pro-badge" id="tryonProBadge">Pro</span>
                 </div>
             </div>
             
-            <!-- 모드 ?�명 -->
+            <!-- 모드 설명 -->
             <div class="mode-description" id="modeDescription" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 10px; background: rgba(0,240,255,0.1); border: 1px solid rgba(0,240,255,0.2); font-size: 0.8rem; color: rgba(255,255,255,0.7);">
             </div>
 
-            <!-- ?��?지 ?�로??(변??모드) -->
+            <!-- 이미지 업로드 (변환 모드) -->
             <div class="upload-zone" id="uploadZone">
-                <div class="upload-icon">?��</div>
-                <div class="upload-text">?��?지�??�래그하거나 ?�릭?�서 ?�로??/div>
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">이미지를 드래그하거나 클릭해서 업로드</div>
                 <div class="upload-hint" id="uploadHint" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 8px;"></div>
             </div>
             <div class="upload-preview" id="uploadPreview">
                 <img id="previewImg" src="" alt="Preview">
-                <button class="remove-btn" id="removeBtn">??/button>
+                <button class="remove-btn" id="removeBtn">✕</button>
             </div>
             <input type="file" id="fileInput" accept="image/*">
 
-            <!-- AI ?�팅 모드 ?�용 UI -->
+            <!-- AI 피팅 모드 전용 UI -->
             <div class="tryon-section" id="tryonSection" style="display: none;">
                 <div class="tryon-uploads" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <!-- 캐릭???�람 ?��?지 -->
+                    <!-- 캐릭터/사람 이미지 -->
                     <div class="tryon-upload-box">
-                        <div class="tryon-label" style="font-size: 0.85rem; margin-bottom: 8px; color: var(--primary);">?�� 캐릭???�람 ?��?지</div>
+                        <div class="tryon-label" style="font-size: 0.85rem; margin-bottom: 8px; color: var(--primary);">👤 캐릭터/사람 이미지</div>
                         <div class="upload-zone tryon-zone" id="humanUploadZone" style="min-height: 150px; font-size: 0.75rem;">
-                            <div class="upload-icon">?��</div>
-                            <div class="upload-text">캐릭???��?지</div>
+                            <div class="upload-icon">🧑</div>
+                            <div class="upload-text">캐릭터 이미지</div>
                         </div>
                         <div class="upload-preview tryon-preview" id="humanPreview" style="display: none;">
                             <img id="humanPreviewImg" src="" alt="Human">
-                            <button class="remove-btn" onclick="removeHumanImage()">??/button>
+                            <button class="remove-btn" onclick="removeHumanImage()">✕</button>
                         </div>
                         <input type="file" id="humanFileInput" accept="image/*" style="display: none;">
                     </div>
                     
-                    <!-- ???��?지 -->
+                    <!-- 옷 이미지 -->
                     <div class="tryon-upload-box">
-                        <div class="tryon-label" style="font-size: 0.85rem; margin-bottom: 8px; color: var(--secondary);">?�� ???��?지</div>
+                        <div class="tryon-label" style="font-size: 0.85rem; margin-bottom: 8px; color: var(--secondary);">👕 옷 이미지</div>
                         <div class="upload-zone tryon-zone" id="garmentUploadZone" style="min-height: 150px; font-size: 0.75rem;">
-                            <div class="upload-icon">?��</div>
-                            <div class="upload-text">???�진</div>
+                            <div class="upload-icon">👗</div>
+                            <div class="upload-text">옷 사진</div>
                         </div>
                         <div class="upload-preview tryon-preview" id="garmentPreview" style="display: none;">
                             <img id="garmentPreviewImg" src="" alt="Garment">
-                            <button class="remove-btn" onclick="removeGarmentImage()">??/button>
+                            <button class="remove-btn" onclick="removeGarmentImage()">✕</button>
                         </div>
                         <input type="file" id="garmentFileInput" accept="image/*" style="display: none;">
                     </div>
                 </div>
                 
-                <!-- ??카테고리 ?�택 -->
+                <!-- 옷 카테고리 선택 -->
                 <div class="tryon-options" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <button class="tag-btn active" data-category="upper_body">?�� ?�의</button>
-                    <button class="tag-btn" data-category="lower_body">?�� ?�의</button>
-                    <button class="tag-btn" data-category="dresses">?�� ?�레??/button>
+                    <button class="tag-btn active" data-category="upper_body">👕 상의</button>
+                    <button class="tag-btn" data-category="lower_body">👖 하의</button>
+                    <button class="tag-btn" data-category="dresses">👗 드레스</button>
                 </div>
                 
-                <!-- ???�명 ?�력 -->
-                <input type="text" id="garmentDescription" placeholder="???�명 (?? blue gradient hoodie, cute pink top)" 
+                <!-- 옷 설명 입력 -->
+                <input type="text" id="garmentDescription" placeholder="옷 설명 (예: blue gradient hoodie, cute pink top)" 
                        style="width: 100%; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; color: #fff; font-size: 0.9rem; margin-bottom: 10px;">
             </div>
 
-            <!-- AI 모델 ?�택 (Pro/Business�? -->
+            <!-- AI 모델 선택 (Pro/Business만) -->
             <div class="section model-select-section" id="modelSelectSection" style="display: none;">
-                <div class="section-title">?�� AI 모델 ?�택</div>
+                <div class="section-title">🤖 AI 모델 선택</div>
                 <div class="model-options" id="modelOptions">
                     <div class="model-option active" data-model="qwen-image">
-                        <div class="model-icon">?��</div>
+                        <div class="model-icon">🔤</div>
                         <div class="model-info">
                             <div class="model-name">Qwen-Image</div>
-                            <div class="model-desc">?�스???�더�??�화 ???��? 지??/div>
+                            <div class="model-desc">텍스트 렌더링 특화 • 한글 지원</div>
                         </div>
                     </div>
                     <div class="model-option" data-model="flux-2-pro">
-                        <div class="model-icon">?��</div>
+                        <div class="model-icon">🌟</div>
                         <div class="model-info">
                             <div class="model-name">FLUX 2 Pro</div>
-                            <div class="model-desc">?��?지 ?�집 ??고품�???최신</div>
+                            <div class="model-desc">이미지 편집 • 고품질 • 최신</div>
                         </div>
                     </div>
                     <div class="model-option" data-model="flux-1.1-pro-ultra">
-                        <div class="model-icon">?��</div>
+                        <div class="model-icon">🎨</div>
                         <div class="model-info">
                             <div class="model-name">FLUX Pro Ultra</div>
-                            <div class="model-desc">4K 초고?�상????최고 ?�질</div>
+                            <div class="model-desc">4K 초고해상도 • 최고 품질</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ?��????�리??-->
+            <!-- 스타일 프리셋 -->
             <div class="section">
-                <div class="section-title">?�� ?��????�리??/div>
+                <div class="section-title">🎭 스타일 프리셋</div>
                 <div class="style-presets">
                     <div class="style-preset" data-style="none" data-prompt="">
-                        <span class="emoji">?��</span>
+                        <span class="emoji">🎯</span>
                         <span class="name">기본</span>
                     </div>
                     <div class="style-preset" data-style="realistic" data-prompt="photorealistic, ultra realistic, 8k uhd, dslr, professional photography, sharp focus, natural lighting">
-                        <span class="emoji">?��</span>
-                        <span class="name">?�사</span>
+                        <span class="emoji">📸</span>
+                        <span class="name">실사</span>
                     </div>
                     <div class="style-preset" data-style="3d" data-prompt="3d render, octane render, unreal engine 5, cinema 4d, smooth, polished, ray tracing">
-                        <span class="emoji">?��</span>
-                        <span class="name">3D?�더</span>
+                        <span class="emoji">🎮</span>
+                        <span class="name">3D렌더</span>
                     </div>
                     <div class="style-preset" data-style="digitalart" data-prompt="digital art, digital painting, artstation trending, detailed illustration, vibrant colors">
-                        <span class="emoji">?���?/span>
-                        <span class="name">?��??�아??/span>
+                        <span class="emoji">🖌️</span>
+                        <span class="name">디지털아트</span>
                     </div>
                     <div class="style-preset" data-style="concept" data-prompt="concept art, illustration, matte painting, detailed, cinematic, epic composition">
-                        <span class="emoji">?��</span>
-                        <span class="name">컨셉?�트</span>
+                        <span class="emoji">🎬</span>
+                        <span class="name">컨셉아트</span>
                     </div>
                     <div class="style-preset" data-style="cyberpunk" data-prompt="cyberpunk, neon lights, futuristic city, dark atmosphere, rain, holographic, sci-fi, blade runner">
-                        <span class="emoji">?��</span>
-                        <span class="name">?�이버펑??/span>
+                        <span class="emoji">🌃</span>
+                        <span class="name">사이버펑크</span>
                     </div>
                     <div class="style-preset" data-style="fantasy" data-prompt="fantasy art, magical, epic, ethereal lighting, mystical atmosphere, detailed">
-                        <span class="emoji">?��</span>
-                        <span class="name">?��?지</span>
+                        <span class="emoji">🧙</span>
+                        <span class="name">판타지</span>
                     </div>
                     <div class="style-preset" data-style="anime" data-prompt="anime style, anime artwork, japanese animation, cel shading, vibrant, detailed anime">
-                        <span class="emoji">?��?��</span>
-                        <span class="name">?�니�?/span>
+                        <span class="emoji">🇯🇵</span>
+                        <span class="name">애니메</span>
                     </div>
                     <div class="style-preset" data-style="oilpaint" data-prompt="oil painting, classical art, renaissance style, visible brush strokes, rich textures, masterpiece">
-                        <span class="emoji">?���?/span>
-                        <span class="name">?�화</span>
+                        <span class="emoji">🖼️</span>
+                        <span class="name">유화</span>
                     </div>
                     <div class="style-preset" data-style="minimal" data-prompt="minimalist, clean design, simple composition, negative space, modern, elegant">
-                        <span class="emoji">�?/span>
+                        <span class="emoji">⬜</span>
                         <span class="name">미니멀</span>
                     </div>
                 </div>
             </div>
 
-            <!-- ?�롬?�트 빌더 -->
+            <!-- 프롬프트 빌더 -->
             <div class="section">
-                <div class="section-title">?���??�롬?�트 빌더</div>
+                <div class="section-title">🏗️ 프롬프트 빌더</div>
                 <div class="prompt-builder">
                     <div class="builder-category">
-                        <div class="builder-category-title">?�� 구도 & ?��?</div>
+                        <div class="builder-category-title">📷 구도 & 앵글</div>
                         <div class="builder-tags">
-                            <span class="builder-tag" data-tag="close-up shot">?�로즈업</span>
-                            <span class="builder-tag" data-tag="wide angle">?�?�드</span>
-                            <span class="builder-tag" data-tag="bird's eye view">?�뷰</span>
-                            <span class="builder-tag" data-tag="low angle">로우?��?</span>
-                            <span class="builder-tag" data-tag="portrait">?�물??/span>
+                            <span class="builder-tag" data-tag="close-up shot">클로즈업</span>
+                            <span class="builder-tag" data-tag="wide angle">와이드</span>
+                            <span class="builder-tag" data-tag="bird's eye view">탑뷰</span>
+                            <span class="builder-tag" data-tag="low angle">로우앵글</span>
+                            <span class="builder-tag" data-tag="portrait">인물샷</span>
                         </div>
                     </div>
                     <div class="builder-category">
-                        <div class="builder-category-title">?�� 조명</div>
+                        <div class="builder-category-title">💡 조명</div>
                         <div class="builder-tags">
-                            <span class="builder-tag" data-tag="studio lighting">?�튜?�오</span>
-                            <span class="builder-tag" data-tag="natural light">?�연�?/span>
-                            <span class="builder-tag" data-tag="golden hour">골든?�워</span>
-                            <span class="builder-tag" data-tag="neon lights">?�온</span>
-                            <span class="builder-tag" data-tag="dramatic lighting">?�라마틱</span>
+                            <span class="builder-tag" data-tag="studio lighting">스튜디오</span>
+                            <span class="builder-tag" data-tag="natural light">자연광</span>
+                            <span class="builder-tag" data-tag="golden hour">골든아워</span>
+                            <span class="builder-tag" data-tag="neon lights">네온</span>
+                            <span class="builder-tag" data-tag="dramatic lighting">드라마틱</span>
                         </div>
                     </div>
                     <div class="builder-category">
-                        <div class="builder-category-title">?�� 분위�?/div>
+                        <div class="builder-category-title">🎨 분위기</div>
                         <div class="builder-tags">
                             <span class="builder-tag" data-tag="moody, atmospheric">무디</span>
-                            <span class="builder-tag" data-tag="bright, cheerful">밝�?</span>
-                            <span class="builder-tag" data-tag="dark, mysterious">?�두??/span>
-                            <span class="builder-tag" data-tag="dreamy, ethereal">몽환??/span>
+                            <span class="builder-tag" data-tag="bright, cheerful">밝은</span>
+                            <span class="builder-tag" data-tag="dark, mysterious">어두운</span>
+                            <span class="builder-tag" data-tag="dreamy, ethereal">몽환적</span>
                             <span class="builder-tag" data-tag="vintage, retro">빈티지</span>
                         </div>
                     </div>
                     <div class="builder-category">
-                        <div class="builder-category-title">???�리??/div>
+                        <div class="builder-category-title">✨ 퀄리티</div>
                         <div class="builder-tags">
-                            <span class="builder-tag selected" data-tag="high quality">고퀄리??/span>
-                            <span class="builder-tag" data-tag="ultra detailed">초고?�질</span>
+                            <span class="builder-tag selected" data-tag="high quality">고퀄리티</span>
+                            <span class="builder-tag" data-tag="ultra detailed">초고화질</span>
                             <span class="builder-tag" data-tag="8k resolution">8K</span>
                             <span class="builder-tag" data-tag="masterpiece">걸작</span>
                         </div>
@@ -1536,28 +1536,28 @@
                 </div>
             </div>
 
-            <!-- ?�롬?�트 ?�력 -->
+            <!-- 프롬프트 입력 -->
             <div class="section">
-                <div class="section-title">?�� ?�롬?�트</div>
+                <div class="section-title">💬 프롬프트</div>
                 <div class="prompt-input-container">
-                    <textarea class="prompt-input" id="promptInput" placeholder="?�하???��?지�??��?�??�명?�세??..&#10;&#10;?? ?�질??바다 ?�의 ?��?, ?�도가 치는 모습"></textarea>
-                    <div class="korean-badge">?��?�� ?��? ?�동 번역</div>
+                    <textarea class="prompt-input" id="promptInput" placeholder="원하는 이미지를 한글로 설명하세요...&#10;&#10;예: 해질녘 바다 위의 등대, 파도가 치는 모습"></textarea>
+                    <div class="korean-badge">🇰🇷 한글 자동 번역</div>
                 </div>
                 
                 <button class="optimize-btn" id="optimizeBtn">
-                    <span>?��</span>
-                    <span>AI ?�롬?�트 최적??(Llama 3.1)</span>
+                    <span>🧠</span>
+                    <span>AI 프롬프트 최적화 (Llama 3.1)</span>
                 </button>
 
                 <div class="optimized-prompt" id="optimizedPrompt">
-                    <div class="label">??AI 최적???�롬?�트 (Llama 3.1)</div>
+                    <div class="label">✨ AI 최적화 프롬프트 (Llama 3.1)</div>
                     <div class="text" id="optimizedText"></div>
                 </div>
             </div>
 
-            <!-- ?�이�??�택 -->
+            <!-- 사이즈 선택 -->
             <div class="section">
-                <div class="section-title">?�� ?��?지 ?�기</div>
+                <div class="section-title">📐 이미지 크기</div>
                 <div class="size-presets">
                     <button class="size-preset active" data-width="1024" data-height="1024">1:1</button>
                     <button class="size-preset" data-width="1280" data-height="720">16:9</button>
@@ -1566,31 +1566,31 @@
                 </div>
                 <div class="multi-size-toggle">
                     <div class="toggle-switch" id="multiSizeToggle"></div>
-                    <span class="toggle-label">??번에 모든 ?�이�??�성</span>
+                    <span class="toggle-label">한 번에 모든 사이즈 생성</span>
                 </div>
             </div>
 
-            <!-- ?�성 버튼 -->
+            <!-- 생성 버튼 -->
             <button class="generate-btn" id="generateBtn">
-                <span>??/span>
-                <span>?��?지 ?�성</span>
+                <span>⚡</span>
+                <span>이미지 생성</span>
             </button>
         </aside>
 
-        <!-- 메인 콘텐�?-->
+        <!-- 메인 콘텐츠 -->
         <main class="main-content">
             <div class="result-header">
                 <div class="result-title">
-                    ?���??�성 결과
-                    <span class="result-count" id="resultCount">0??/span>
+                    🖼️ 생성 결과
+                    <span class="result-count" id="resultCount">0장</span>
                 </div>
                 <div class="model-badge" id="modelBadge">FLUX.1-schnell</div>
             </div>
 
-            <!-- ?�로그레??-->
+            <!-- 프로그레스 -->
             <div class="progress-section" id="progressSection">
                 <div class="progress-info">
-                    <span id="progressLabel">?��?지 ?�성 준�?�?..</span>
+                    <span id="progressLabel">이미지 생성 준비 중...</span>
                     <span id="progressPercent">0%</span>
                 </div>
                 <div class="progress-bar">
@@ -1598,42 +1598,42 @@
                 </div>
             </div>
 
-            <!-- 결과 그리??-->
+            <!-- 결과 그리드 -->
             <div class="result-grid" id="resultGrid">
                 <div class="result-card">
                     <div class="result-image">
                         <div class="placeholder">
-                            <div class="placeholder-icon">?��</div>
-                            <div>?��?지�??�성?�주?�요</div>
+                            <div class="placeholder-icon">🎨</div>
+                            <div>이미지를 생성해주세요</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ?�스?�리 ?�션 -->
+            <!-- 히스토리 섹션 -->
             <div class="history-section" id="historySection">
                 <div class="history-header">
                     <div class="history-title">
-                        ?�� ?�?�된 ?��?지
+                        📁 저장된 이미지
                         <span class="history-count" id="historyCount">0/20</span>
                     </div>
-                    <button class="clear-history-btn" onclick="clearHistory()">?���??�체 ??��</button>
+                    <button class="clear-history-btn" onclick="clearHistory()">🗑️ 전체 삭제</button>
                 </div>
                 <div class="result-grid" id="historyGrid">
-                    <div class="history-empty">?�?�된 ?��?지가 ?�습?�다</div>
+                    <div class="history-empty">저장된 이미지가 없습니다</div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- ?�스??-->
+    <!-- 토스트 -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
         const API_URL = 'https://kampai-production.up.railway.app';
-        const MAX_HISTORY = 20;  // 최�? ?�???��?지 ??
+        const MAX_HISTORY = 20;  // 최대 저장 이미지 수
 
-        // ?�증 ?�태 관�?
+        // 인증 상태 관리
         let authState = {
             isLoggedIn: false,
             user: null,
@@ -1641,7 +1641,7 @@
             remainingGenerations: 0
         };
 
-        // ?�태 관�?
+        // 상태 관리
         let state = {
             mode: 'create',
             style: 'none',
@@ -1653,11 +1653,11 @@
             uploadedImage: null,
             optimizedPrompt: '',
             images: [],
-            selectedModel: null  // ?�택??AI 모델 (Pro/Business)
+            selectedModel: null  // 선택된 AI 모델 (Pro/Business)
         };
 
         // ============================================
-        // ?�스?�리 관�?(localStorage)
+        // 히스토리 관리 (localStorage)
         // ============================================
         
         function getHistory() {
@@ -1675,7 +1675,7 @@
         function addToHistory(imageData) {
             const history = getHistory();
             
-            // ???��?지 추�? (?�에 추�?)
+            // 새 이미지 추가 (앞에 추가)
             history.unshift({
                 id: Date.now(),
                 url: imageData.url,
@@ -1685,7 +1685,7 @@
                 createdAt: new Date().toISOString()
             });
             
-            // 최�? 개수 초과 ???�래??�??�거
+            // 최대 개수 초과 시 오래된 것 제거
             while (history.length > MAX_HISTORY) {
                 history.pop();
             }
@@ -1698,14 +1698,14 @@
             const history = getHistory().filter(item => item.id !== id);
             saveHistory(history);
             renderHistory();
-            showToast('?��?지가 ??��?�었?�니??, 'success');
+            showToast('이미지가 삭제되었습니다', 'success');
         }
 
         function clearHistory() {
-            if (confirm('?�?�된 모든 ?��?지�???��?�시겠습?�까?')) {
+            if (confirm('저장된 모든 이미지를 삭제하시겠습니까?')) {
                 saveHistory([]);
                 renderHistory();
-                showToast('모든 ?��?지가 ??��?�었?�니??, 'success');
+                showToast('모든 이미지가 삭제되었습니다', 'success');
             }
         }
 
@@ -1717,29 +1717,29 @@
             historyCount.textContent = `${history.length}/${MAX_HISTORY}`;
             
             if (history.length === 0) {
-                historyGrid.innerHTML = '<div class="history-empty">?�?�된 ?��?지가 ?�습?�다</div>';
+                historyGrid.innerHTML = '<div class="history-empty">저장된 이미지가 없습니다</div>';
                 return;
             }
             
             historyGrid.innerHTML = history.map(item => `
                 <div class="result-card" data-id="${item.id}">
                     <div class="result-image">
-                        <button class="delete-btn" onclick="removeFromHistory(${item.id})" title="??��">??/button>
-                        <img src="${item.url}" alt="Generated" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><div class=\\'placeholder-icon\\'>?�️</div><div>?��?지 만료</div></div>'">
+                        <button class="delete-btn" onclick="removeFromHistory(${item.id})" title="삭제">✕</button>
+                        <img src="${item.url}" alt="Generated" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><div class=\\'placeholder-icon\\'>⚠️</div><div>이미지 만료</div></div>'">
                         <div class="image-overlay">
                             <div class="overlay-actions">
                                 <button class="overlay-btn" onclick="downloadImage('${item.url}', 'kampai_${item.id}.png')">
-                                    �??�운로드
+                                    ⬇ 다운로드
                                 </button>
                                 <button class="overlay-btn" onclick="window.open('${item.url}', '_blank')">
-                                    ?�� ?��?
+                                    🔍 확대
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="result-info" style="padding: 10px; font-size: 0.75rem; color: rgba(255,255,255,0.5);">
                         <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.prompt}">
-                            ${item.prompt ? item.prompt.substring(0, 50) + (item.prompt.length > 50 ? '...' : '') : '?�롬?�트 ?�음'}
+                            ${item.prompt ? item.prompt.substring(0, 50) + (item.prompt.length > 50 ? '...' : '') : '프롬프트 없음'}
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-top: 5px;">
                             <span>${item.model}</span>
@@ -1750,7 +1750,7 @@
             `).join('');
         }
 
-        // ?�증 ?�태 ?�인
+        // 인증 상태 확인
         async function checkAuth() {
             const token = localStorage.getItem('kampai_token');
             if (!token) {
@@ -1770,7 +1770,7 @@
                     authState.isLoggedIn = true;
                     authState.user = data.user;
                     
-                    // 구독 ?�보 가?�오�?
+                    // 구독 정보 가져오기
                     await fetchSubscription(token);
                     updateAuthUI();
                     return true;
@@ -1788,7 +1788,7 @@
             }
         }
 
-        // 구독 ?�보 가?�오�?
+        // 구독 정보 가져오기
         async function fetchSubscription(token) {
             try {
                 const response = await fetch(`${API_URL}/api/subscription`, {
@@ -1800,14 +1800,12 @@
                     authState.subscription = data;
                     authState.remainingGenerations = data.remaining_today;
                     
-                    // authState.user.plan???�기??
+                    // authState.user.plan도 동기화
                     if (authState.user && data.plan) {
                         authState.user.plan = data.plan;
                     }
                     
-
-                    
-                    // 모델 ?�택 UI ?�데?�트
+                    // 모델 선택 UI 업데이트
                     await updateModelOptions();
                 }
             } catch (error) {
@@ -1815,33 +1813,29 @@
             }
         }
 
-        // 모델 ?�택 ?�션 ?�데?�트
+        // 모델 선택 옵션 업데이트
         async function updateModelOptions() {
             const plan = authState.subscription?.plan || authState.user?.plan || 'free';
             const modelSection = document.getElementById('modelSelectSection');
             const modelBadge = document.getElementById('modelBadge');
             
-
-            
-            // Pro/Business�?모델 ?�택 가??
+            // Pro/Business만 모델 선택 가능
             if (plan === 'pro' || plan === 'business') {
                 modelSection.style.display = 'block';
                 
-                // 기본 모델 ?�정
+                // 기본 모델 설정
                 if (!state.selectedModel) {
                     state.selectedModel = 'qwen-image';
                 }
                 updateModelBadge();
-
             } else {
                 modelSection.style.display = 'none';
                 state.selectedModel = 'flux-schnell';
                 modelBadge.textContent = 'FLUX.1-schnell';
-
             }
         }
 
-        // 모델 배�? ?�데?�트
+        // 모델 배지 업데이트
         function updateModelBadge() {
             const modelBadge = document.getElementById('modelBadge');
             const modelNames = {
@@ -1853,18 +1847,17 @@
             modelBadge.textContent = modelNames[state.selectedModel] || state.selectedModel;
         }
 
-        // 모델 ?�택 ?�벤??
+        // 모델 선택 이벤트
         document.querySelectorAll('.model-option').forEach(option => {
             option.addEventListener('click', () => {
                 document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
                 option.classList.add('active');
                 state.selectedModel = option.dataset.model;
                 updateModelBadge();
-
             });
         });
 
-        // ?�용??기록
+        // 사용량 기록
         async function recordUsage() {
             const token = localStorage.getItem('kampai_token');
             if (!token) return;
@@ -1881,21 +1874,20 @@
                 
                 const data = await response.json();
                 
-                // ?�버?�서 반환??최신 ?�용?�으�??�데?�트
+                // 서버에서 반환한 최신 사용량으로 업데이트
                 if (data.success && data.usage) {
                     const plan = authState.subscription?.plan || authState.user?.plan || 'free';
                     const dailyLimit = data.usage.daily_limit || 3;
                     const usedToday = data.usage.today || data.usage.today_count || 0;
                     
-                    // 무제??-1)???�니�??��? ?�수 계산
+                    // 무제한(-1)이 아니면 남은 횟수 계산
                     if (dailyLimit > 0) {
                         authState.remainingGenerations = Math.max(0, dailyLimit - usedToday);
                     }
                     
-
                     updateAuthUI();
                 } else {
-                    // ?�백: 로컬?�서 감소
+                    // 폴백: 로컬에서 감소
                     if (authState.remainingGenerations > 0) {
                         authState.remainingGenerations--;
                         updateAuthUI();
@@ -1903,7 +1895,7 @@
                 }
             } catch (error) {
                 console.error('Usage record failed:', error);
-                // ?�러 ?�에??로컬?�서 감소
+                // 에러 시에도 로컬에서 감소
                 if (authState.remainingGenerations > 0) {
                     authState.remainingGenerations--;
                     updateAuthUI();
@@ -1911,17 +1903,17 @@
             }
         }
 
-        // ?�증 UI ?�데?�트
+        // 인증 UI 업데이트
         function updateAuthUI() {
             const authBadge = document.getElementById('authBadge');
             
             if (!authState.isLoggedIn) {
                 authBadge.innerHTML = `
                     <span class="auth-status guest">
-                        <span>?��</span>
-                        <span>비로그인 (3??무료)</span>
+                        <span>👤</span>
+                        <span>비로그인 (3회 무료)</span>
                     </span>
-                    <a href="index.html#" onclick="location.href='index.html'; return false;" class="login-link">로그??/a>
+                    <a href="index.html#" onclick="location.href='index.html'; return false;" class="login-link">로그인</a>
                 `;
             } else {
                 const planNames = { 'free': '무료', 'basic': 'Basic', 'pro': 'Pro', 'business': 'Business' };
@@ -1930,38 +1922,34 @@
                 
                 let usageText = '';
                 if (plan === 'free') {
-                    usageText = ` (${authState.remainingGenerations}/3 ?�음)`;
+                    usageText = ` (${authState.remainingGenerations}/3 남음)`;
                 } else if (plan === 'basic') {
-                    usageText = ` (${authState.remainingGenerations}/30 ?�음)`;
+                    usageText = ` (${authState.remainingGenerations}/30 남음)`;
                 } else if (plan === 'pro') {
-                    usageText = ` (${authState.remainingGenerations}/100 ?�음)`;
+                    usageText = ` (${authState.remainingGenerations}/100 남음)`;
                 } else if (plan === 'business') {
-                    usageText = ` (${authState.remainingGenerations}/500 ?�음)`;
+                    usageText = ` (${authState.remainingGenerations}/500 남음)`;
                 }
-                
-
                 
                 authBadge.innerHTML = `
                     <span class="auth-status logged-in">
-                        <span>??/span>
-                        <span>${authState.user?.email || '?�용??}</span>
+                        <span>✨</span>
+                        <span>${authState.user?.email || '사용자'}</span>
                         <span class="plan-badge ${plan}">${planName}${usageText}</span>
                     </span>
-                    <button onclick="openAccountModal()" class="mypage-btn">??계정</button>
-                    <button onclick="logout()" class="logout-btn">로그?�웃</button>
+                    <button onclick="openAccountModal()" class="mypage-btn">내 계정</button>
+                    <button onclick="logout()" class="logout-btn">로그아웃</button>
                 `;
             }
             
-            // Pro ?�용 ???�금 ?�태 ?�데?�트
+            // Pro 전용 탭 잠금 상태 업데이트
             updateProTabsLockState();
         }
         
-        // Pro ?�용 ???�금 ?�태 ?�데?�트
+        // Pro 전용 탭 잠금 상태 업데이트
         function updateProTabsLockState() {
             const plan = authState.subscription?.plan || authState.user?.plan || 'free';
             const isPro = (plan === 'pro' || plan === 'business');
-            
-
             
             const transformTab = document.getElementById('transformTab');
             const tryonTab = document.getElementById('tryonTab');
@@ -1989,23 +1977,23 @@
             }
         }
 
-        // 로그?�웃
+        // 로그아웃
         function logout() {
             localStorage.removeItem('kampai_token');
             authState.isLoggedIn = false;
             authState.user = null;
             authState.subscription = null;
             updateAuthUI();
-            showToast('로그?�웃?�었?�니??, 'success');
+            showToast('로그아웃되었습니다', 'success');
         }
 
-        // ?�성 가???��? 체크
+        // 생성 가능 여부 체크
         function canGenerate() {
-            // 비로그인 ?�용?�도 3?�까지 ?�용 (?�션 기반?�로 처리)
+            // 비로그인 사용자도 3회까지 허용 (세션 기반으로 처리)
             if (!authState.isLoggedIn) {
                 const guestCount = parseInt(localStorage.getItem('kampai_guest_count') || '0');
                 if (guestCount >= 3) {
-                    showToast('무료 체험???�났?�니?? 로그?�하????많�? ?��?지�??�성?�세??', 'error');
+                    showToast('무료 체험이 끝났습니다. 로그인하여 더 많은 이미지를 생성하세요!', 'error');
                     setTimeout(() => {
                         location.href = 'index.html';
                     }, 2000);
@@ -2014,37 +2002,37 @@
                 return true;
             }
 
-            // 로그???�용??
+            // 로그인 사용자
             const plan = authState.subscription?.plan || 'free';
             
             if (plan === 'pro' || plan === 'business') {
-                return true;  // 무제??
+                return true;  // 무제한
             }
             
             if (plan === 'free' && authState.remainingGenerations <= 0) {
-                showToast('?�늘??무료 ?�성 ?�수�?모두 ?�용?�습?�다. Pro�??�그?�이?�하?�요!', 'error');
+                showToast('오늘의 무료 생성 횟수를 모두 사용했습니다. Pro로 업그레이드하세요!', 'error');
                 return false;
             }
             
             return true;
         }
 
-        // 게스???�용??기록
+        // 게스트 사용량 기록
         function recordGuestUsage() {
             const guestCount = parseInt(localStorage.getItem('kampai_guest_count') || '0');
             localStorage.setItem('kampai_guest_count', (guestCount + 1).toString());
         }
 
-        // ?�이지 로드 ???�증 체크 �??�스?�리 ?�더�?
+        // 페이지 로드 시 인증 체크 및 히스토리 렌더링
         document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
-            renderHistory();  // ?�?�된 ?��?지 ?�스?�리 ?�시
-            initTryOnUpload();  // Try-On ?�로??초기??
+            renderHistory();  // 저장된 이미지 히스토리 표시
+            initTryOnUpload();  // Try-On 업로드 초기화
         });
         
-        // Try-On ?�로??초기???�수
+        // Try-On 업로드 초기화 함수
         function initTryOnUpload() {
-            // 캐릭???��?지 ?�로??
+            // 캐릭터 이미지 업로드
             const humanUploadZone = document.getElementById('humanUploadZone');
             const humanFileInput = document.getElementById('humanFileInput');
             
@@ -2068,7 +2056,7 @@
                 });
             }
             
-            // ???��?지 ?�로??
+            // 옷 이미지 업로드
             const garmentUploadZone = document.getElementById('garmentUploadZone');
             const garmentFileInput = document.getElementById('garmentFileInput');
             
@@ -2091,11 +2079,9 @@
                     }
                 });
             }
-            
-
         }
         
-        // 캐릭???��?지 ?�거
+        // 캐릭터 이미지 제거
         function removeHumanImage() {
             tryonState.humanImage = null;
             document.getElementById('humanUploadZone').style.display = 'flex';
@@ -2103,7 +2089,7 @@
             document.getElementById('humanFileInput').value = '';
         }
         
-        // ???��?지 ?�거
+        // 옷 이미지 제거
         function removeGarmentImage() {
             tryonState.garmentImage = null;
             document.getElementById('garmentUploadZone').style.display = 'flex';
@@ -2111,7 +2097,7 @@
             document.getElementById('garmentFileInput').value = '';
         }
 
-        // DOM ?�소
+        // DOM 요소
         const promptInput = document.getElementById('promptInput');
         const generateBtn = document.getElementById('generateBtn');
         const optimizeBtn = document.getElementById('optimizeBtn');
@@ -2129,111 +2115,111 @@
         const previewImg = document.getElementById('previewImg');
         const fileInput = document.getElementById('fileInput');
 
-        // ?��? ???�어 ?�롬?�트 변???�전 (?�???�장)
+        // 한글 → 영어 프롬프트 변환 사전 (대폭 확장)
         const koreanToEnglish = {
-            // ?�람/?�물
-            '?�자': 'man', '?�자': 'woman', '?�람': 'person', '?�이': 'child', '?��?': 'girl', 
-            '?�년': 'boy', '?�인': 'elderly person', '�?��': 'young man', '?�기': 'baby',
-            '?�생': 'student', '?�사??: 'office worker', '?�리??: 'chef', '?�사': 'doctor',
+            // 사람/인물
+            '남자': 'man', '여자': 'woman', '사람': 'person', '아이': 'child', '소녀': 'girl', 
+            '소년': 'boy', '노인': 'elderly person', '청년': 'young man', '아기': 'baby',
+            '학생': 'student', '회사원': 'office worker', '요리사': 'chef', '의사': 'doctor',
             
-            // ?�물
-            '고양??: 'cat', '강아지': 'dog', '�?: 'dog', '??: 'bird', '물고�?: 'fish',
-            '?�끼': 'rabbit', '�?: 'bear', '?�랑??: 'tiger', '?�자': 'lion', '�?: 'horse',
-            '코끼�?: 'elephant', '??��': 'penguin', '??: 'dragon', '공룡': 'dinosaur',
+            // 동물
+            '고양이': 'cat', '강아지': 'dog', '개': 'dog', '새': 'bird', '물고기': 'fish',
+            '토끼': 'rabbit', '곰': 'bear', '호랑이': 'tiger', '사자': 'lion', '말': 'horse',
+            '코끼리': 'elephant', '펭귄': 'penguin', '용': 'dragon', '공룡': 'dinosaur',
             
-            // ?�식 (�??�어�?- 짧�? ?�어???�탐 ?�발)
-            '짜장�?: 'jajangmyeon, black bean noodles',
+            // 음식 (긴 단어만 - 짧은 단어는 오탐 유발)
+            '짜장면': 'jajangmyeon, black bean noodles',
             '짬뽕': 'jjamppong, spicy seafood noodles',
-            '?�면': 'ramen noodles', '�?��': 'noodles',
-            '김�?: 'kimchi', '불고�?: 'bulgogi', '비빔�?: 'bibimbap',
-            '?�겹??: 'samgyeopsal, korean bbq pork belly', '치킨': 'fried chicken',
-            '?�볶??: 'tteokbokki, spicy rice cakes', '김�?: 'kimbap, korean rice roll',
-            '?�장찌개': 'doenjang jjigae, soybean paste stew',
-            '?�계??: 'samgyetang, chicken ginseng soup',
-            '?�면': 'naengmyeon, cold noodles', '족발': 'jokbal, pig feet',
-            '?�식': 'food', '과일': 'fruit', '?�과': 'apple', '커피': 'coffee', 
-            '케?�크': 'cake', '?�자': 'pizza', '?�버�?: 'hamburger', 
-            '초밥': 'sushi', '?�테?�크': 'steak', '?�스?�': 'pasta', '?�러??: 'salad',
-            '?�이?�크�?: 'ice cream', '초콜�?: 'chocolate', '쿠키': 'cookie',
-            '맥주': 'beer', '?�??: 'wine', '?�주': 'soju',
+            '라면': 'ramen noodles', '국수': 'noodles',
+            '김치': 'kimchi', '불고기': 'bulgogi', '비빔밥': 'bibimbap',
+            '삼겹살': 'samgyeopsal, korean bbq pork belly', '치킨': 'fried chicken',
+            '떡볶이': 'tteokbokki, spicy rice cakes', '김밥': 'kimbap, korean rice roll',
+            '된장찌개': 'doenjang jjigae, soybean paste stew',
+            '삼계탕': 'samgyetang, chicken ginseng soup',
+            '냉면': 'naengmyeon, cold noodles', '족발': 'jokbal, pig feet',
+            '음식': 'food', '과일': 'fruit', '사과': 'apple', '커피': 'coffee', 
+            '케이크': 'cake', '피자': 'pizza', '햄버거': 'hamburger', 
+            '초밥': 'sushi', '스테이크': 'steak', '파스타': 'pasta', '샐러드': 'salad',
+            '아이스크림': 'ice cream', '초콜릿': 'chocolate', '쿠키': 'cookie',
+            '맥주': 'beer', '와인': 'wine', '소주': 'soju',
             
-            // ?�작/?�위 (?�심!)
-            '먹고 ?�는': 'eating', '먹는': 'eating', '먹다': 'eating',
-            '마시�??�는': 'drinking', '마시??: 'drinking', '마시??: 'drinking',
-            '?�아 ?�는': 'sitting', '?�아?�는': 'sitting', '?��?': 'sitting',
-            '???�는': 'standing', '?�있??: 'standing', '??: 'standing',
-            '걷고 ?�는': 'walking', '걷는': 'walking', '걷다': 'walking',
-            '?�고 ?�는': 'running', '?�는': 'running', '?�리??: 'running',
-            '?�고 ?�는': 'sleeping', '?�는': 'sleeping', '?�자??: 'sleeping',
-            '?�고 ?�는': 'smiling', '?�는': 'smiling', '미소짓는': 'smiling',
-            '?�고 ?�는': 'crying', '?�는': 'crying',
-            '?�래?�는': 'singing', '춤추??: 'dancing', '?�리?�는': 'cooking',
-            '?�고 ?�는': 'reading', '?�는': 'reading', '�??�는': 'reading a book',
-            '?�하??: 'working', '공�??�는': 'studying', '그리??: 'drawing',
-            '?�고 ?�는': 'holding', '?�고?�는': 'holding', '?�고 ?�는': 'holding',
-            '보고 ?�는': 'looking at', '바라보는': 'looking at', '쳐다보는': 'looking at',
-            '?��??�는': 'playing', '?�는': 'playing',
+            // 동작/행위 (핵심!)
+            '먹고 있는': 'eating', '먹는': 'eating', '먹다': 'eating',
+            '마시고 있는': 'drinking', '마시는': 'drinking', '마시다': 'drinking',
+            '앉아 있는': 'sitting', '앉아있는': 'sitting', '앉은': 'sitting',
+            '서 있는': 'standing', '서있는': 'standing', '선': 'standing',
+            '걷고 있는': 'walking', '걷는': 'walking', '걷다': 'walking',
+            '뛰고 있는': 'running', '뛰는': 'running', '달리는': 'running',
+            '자고 있는': 'sleeping', '자는': 'sleeping', '잠자는': 'sleeping',
+            '웃고 있는': 'smiling', '웃는': 'smiling', '미소짓는': 'smiling',
+            '울고 있는': 'crying', '우는': 'crying',
+            '노래하는': 'singing', '춤추는': 'dancing', '요리하는': 'cooking',
+            '읽고 있는': 'reading', '읽는': 'reading', '책 읽는': 'reading a book',
+            '일하는': 'working', '공부하는': 'studying', '그리는': 'drawing',
+            '들고 있는': 'holding', '들고있는': 'holding', '잡고 있는': 'holding',
+            '보고 있는': 'looking at', '바라보는': 'looking at', '쳐다보는': 'looking at',
+            '놀고 있는': 'playing', '노는': 'playing',
             
-            // ?�소
-            '?�당': 'restaurant', '중국�?: 'chinese restaurant', '?�식??: 'korean restaurant',
-            '�?: 'house, home', '�?: 'room', '거실': 'living room', '침실': 'bedroom', 
-            '주방': 'kitchen', '?�장??: 'bathroom', '?�무??: 'office',
-            '?�교': 'school', '병원': 'hospital', '공원': 'park', '?�원': 'garden',
-            '카페': 'cafe', '�?: 'bar', '?�럽': 'club', '마트': 'supermarket',
-            '?��?': 'beach', '??: 'mountain', '??: 'forest', '�?: 'river', '?�수': 'lake',
-            '바다': 'sea, ocean', '?�늘': 'sky', '?�시': 'city', '거리': 'street',
-            '?�골': 'countryside', '마을': 'village', '??: 'island',
+            // 장소
+            '식당': 'restaurant', '중국집': 'chinese restaurant', '한식당': 'korean restaurant',
+            '집': 'house, home', '방': 'room', '거실': 'living room', '침실': 'bedroom', 
+            '주방': 'kitchen', '화장실': 'bathroom', '사무실': 'office',
+            '학교': 'school', '병원': 'hospital', '공원': 'park', '정원': 'garden',
+            '카페': 'cafe', '바': 'bar', '클럽': 'club', '마트': 'supermarket',
+            '해변': 'beach', '산': 'mountain', '숲': 'forest', '강': 'river', '호수': 'lake',
+            '바다': 'sea, ocean', '하늘': 'sky', '도시': 'city', '거리': 'street',
+            '시골': 'countryside', '마을': 'village', '섬': 'island',
             
-            // ?�물
-            '?��???: 'chopsticks', '?��???: 'spoon', '?�크': 'fork', '?�이??: 'knife',
-            '그릇': 'bowl', '?�시': 'plate', '�?: 'cup', '??: 'glass',
-            '?�이�?: 'table', '?�탁': 'dining table', '?�자': 'chair',
-            '�?: 'book', '컴퓨??: 'computer', '?�드??: 'smartphone', '?�트�?: 'laptop',
-            '?�동�?: 'car', '버스': 'bus', '지?�철': 'subway', '비행�?: 'airplane',
-            '�?: 'flower', '?�무': 'tree', '?�': 'grass', '??: 'leaf',
+            // 사물
+            '젓가락': 'chopsticks', '숟가락': 'spoon', '포크': 'fork', '나이프': 'knife',
+            '그릇': 'bowl', '접시': 'plate', '컵': 'cup', '잔': 'glass',
+            '테이블': 'table', '식탁': 'dining table', '의자': 'chair',
+            '책': 'book', '컴퓨터': 'computer', '핸드폰': 'smartphone', '노트북': 'laptop',
+            '자동차': 'car', '버스': 'bus', '지하철': 'subway', '비행기': 'airplane',
+            '꽃': 'flower', '나무': 'tree', '풀': 'grass', '잎': 'leaf',
             
-            // ?�용??
-            '맛있??: 'delicious', '?�거??: 'hot, steaming', '차�???: 'cold',
-            '?�름?�운': 'beautiful', '?�쁜': 'pretty', '귀?�운': 'cute', '멋진': 'cool, stylish',
-            '?�려??: 'gorgeous, colorful', '?�플??: 'simple', '모던??: 'modern',
-            '?�두??: 'dark', '밝�?': 'bright', '?�뜻??: 'warm', '부?�러??: 'soft',
-            '??: 'big, large', '?��?': 'small', '거�???: 'huge, giant',
-            '?�복??: 'happy', '?�픈': 'sad', '?�난': 'angry', '즐거??: 'joyful',
-            '?�비로운': 'mystical', '?�상?�인': 'fantastic', '마법??: 'magical',
+            // 형용사
+            '맛있는': 'delicious', '뜨거운': 'hot, steaming', '차가운': 'cold',
+            '아름다운': 'beautiful', '예쁜': 'pretty', '귀여운': 'cute', '멋진': 'cool, stylish',
+            '화려한': 'gorgeous, colorful', '심플한': 'simple', '모던한': 'modern',
+            '어두운': 'dark', '밝은': 'bright', '따뜻한': 'warm', '부드러운': 'soft',
+            '큰': 'big, large', '작은': 'small', '거대한': 'huge, giant',
+            '행복한': 'happy', '슬픈': 'sad', '화난': 'angry', '즐거운': 'joyful',
+            '신비로운': 'mystical', '환상적인': 'fantastic', '마법의': 'magical',
             
-            // ?�간/?�씨
-            '?�침': 'morning', '?�심': 'noon, lunch time', '?�??: 'evening', '�?: 'night',
-            '?�벽': 'dawn', '?�혼': 'twilight', '?�몰': 'sunset', '?�출': 'sunrise',
-            '비오??: 'rainy', '?�오??: 'snowy', '맑�?': 'sunny, clear', '?�린': 'cloudy',
+            // 시간/날씨
+            '아침': 'morning', '점심': 'noon, lunch time', '저녁': 'evening', '밤': 'night',
+            '새벽': 'dawn', '황혼': 'twilight', '일몰': 'sunset', '일출': 'sunrise',
+            '비오는': 'rainy', '눈오는': 'snowy', '맑은': 'sunny, clear', '흐린': 'cloudy',
             
-            // ?��???
-            '?�진': 'photograph', '그림': 'painting', '?�러?�트': 'illustration', 
-            '?��?�?: 'sketch', '만화': 'cartoon', '?�니메이??: 'animation',
+            // 스타일
+            '사진': 'photograph', '그림': 'painting', '일러스트': 'illustration', 
+            '스케치': 'sketch', '만화': 'cartoon', '애니메이션': 'animation',
             
-            // 분위�?
-            '?�화로운': 'peaceful', '고요??: 'serene', '?�기�?: 'vibrant',
-            '로맨?�한': 'romantic', '?�라마틱??: 'dramatic', '?�안??: 'cozy'
+            // 분위기
+            '평화로운': 'peaceful', '고요한': 'serene', '활기찬': 'vibrant',
+            '로맨틱한': 'romantic', '드라마틱한': 'dramatic', '편안한': 'cozy'
         };
         
-        // ?��? ?�함 ?��? 체크
+        // 한글 포함 여부 체크
         function containsKorean(text) {
-            return /[가-??/.test(text);
+            return /[가-힣]/.test(text);
         }
 
-        // ?��? ?�롬?�트 최적??(개선??버전)
+        // 한글 프롬프트 최적화 (개선된 버전)
         function optimizeKoreanPrompt(koreanText) {
             let result = koreanText;
             
-            // 1?�계: 조사 먼�? ?�거 (�?문자?�로 ?��?
-            const particles = ['??, '�?, '??, '가', '?�', '??, '?�서', '??, '??, '�?, '?�', '?�로', '�?, '??, '�?, '까�?', '부??, '처럼', '같�?', '?�는', '?�고', '?�며'];
+            // 1단계: 조사 먼저 제거 (빈 문자열로 대체)
+            const particles = ['을', '를', '이', '가', '은', '는', '에서', '에', '의', '과', '와', '으로', '로', '도', '만', '까지', '부터', '처럼', '같은', '하는', '하고', '하며'];
             for (const particle of particles) {
                 const regex = new RegExp(particle, 'g');
                 result = result.replace(regex, ' ');
             }
             
-            // 2?�계: �??�현부??먼�? 변??(?�서 중요!)
+            // 2단계: 긴 표현부터 먼저 변환 (순서 중요!)
             const sortedEntries = Object.entries(koreanToEnglish)
-                .filter(([k, v]) => k && v)  // �?�??�외
+                .filter(([k, v]) => k && v)  // 빈 값 제외
                 .sort((a, b) => b[0].length - a[0].length);
             
             for (const [korean, english] of sortedEntries) {
@@ -2241,27 +2227,27 @@
                 result = result.replace(regex, english);
             }
             
-            // 3?�계: ?��? ?��? 문자 ?�거 (변??????것들)
-            result = result.replace(/[가-??+/g, '');
+            // 3단계: 남은 한글 문자 제거 (변환 안 된 것들)
+            result = result.replace(/[가-힣]+/g, '');
             
-            // 중복 공백, ?�표 ?�리
+            // 중복 공백, 쉼표 정리
             result = result.replace(/,\s*,/g, ',');
             result = result.replace(/\s+/g, ' ');
             result = result.replace(/,\s*$/g, '');
             result = result.replace(/^\s*,/g, '');
             result = result.trim();
             
-            // ?�택???��????�리??추�?
+            // 선택된 스타일 프리셋 추가
             if (state.stylePrompt) {
                 result = result + ', ' + state.stylePrompt;
             }
             
-            // ?�택???�그 추�?
+            // 선택된 태그 추가
             if (state.selectedTags.length > 0) {
                 result = result + ', ' + state.selectedTags.join(', ');
             }
             
-            // 기본 ?�질 ?�그가 ?�으�?추�?
+            // 기본 품질 태그가 없으면 추가
             if (!result.toLowerCase().includes('quality') && !result.toLowerCase().includes('detailed')) {
                 result += ', high quality, detailed';
             }
@@ -2269,64 +2255,64 @@
             return result;
         }
 
-        // 모드 ???�환
+        // 모드 탭 전환
         document.querySelectorAll('.mode-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const mode = tab.dataset.mode;
                 const userPlan = authState.subscription?.plan || authState.user?.plan || 'free';
                 const isPremium = ['pro', 'business'].includes(userPlan);
                 
-                // Pro/Business ?�용 기능 체크
+                // Pro/Business 전용 기능 체크
                 if ((mode === 'transform' || mode === 'tryon') && !isPremium) {
-                    showToast('??기능?� Pro/Business ?�랜?�서�??�용 가?�합?�다. ?�랜???�그?�이?�해주세??', 'error');
-                    return;  // 모드 ?�환 차단
+                    showToast('이 기능은 Pro/Business 플랜에서만 사용 가능합니다. 플랜을 업그레이드해주세요!', 'error');
+                    return;  // 모드 전환 차단
                 }
                 
                 document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 state.mode = mode;
                 
-                // ?�로???�역 ?�시/?��? (transform, reference 모드?�서�?
+                // 업로드 영역 표시/숨김 (transform, reference 모드에서만)
                 const showUpload = state.mode === 'transform' || state.mode === 'reference';
                 uploadZone.classList.toggle('active', showUpload);
                 
                 if (state.mode === 'create') {
                     uploadPreview.classList.remove('active');
                     state.uploadedImage = null;
-                    promptInput.placeholder = '?�하???��?지�??��?�??�명?�세??..\n\n?? ?�질??바다 ?�의 ?��?, ?�도가 치는 모습';
+                    promptInput.placeholder = '원하는 이미지를 한글로 설명하세요...\n\n예: 해질녘 바다 위의 등대, 파도가 치는 모습';
                     document.getElementById('modeDescription').style.display = 'none';
-                    // Pro/Business�?모델 ?�택 ?�시
+                    // Pro/Business면 모델 선택 표시
                     const userPlan = authState.subscription?.plan || authState.user?.plan || 'free';
                     if (authState.isLoggedIn && ['pro', 'business'].includes(userPlan)) {
                         document.getElementById('modelSelectSection').style.display = 'block';
                     }
                 }
                 
-                // ?��?지 ?�집 모드
+                // 이미지 편집 모드
                 if (state.mode === 'transform') {
-                    promptInput.placeholder = '?��?지�??�떻�?변경할지 ?�명?�세??..\n\n?? 배경???�주�?바꿔�?n?? ?�람???�을 빨간?�으�?바꿔�?n?? ?�니메이???��??�로 변?�해�?;
+                    promptInput.placeholder = '이미지를 어떻게 변경할지 설명하세요...\n\n예: 배경을 우주로 바꿔줘\n예: 사람의 옷을 빨간색으로 바꿔줘\n예: 애니메이션 스타일로 변환해줘';
                     document.getElementById('modeDescription').style.display = 'block';
-                    document.getElementById('modeDescription').innerHTML = '?�� <b>?��?지 ?�집</b>: ?�로?�한 ?��?지�?직접 ?�정<br>배경 변�? ?��???변?? ?�상 ?�정 ??;
-                    document.getElementById('uploadHint').textContent = '?�집???��?지�??�로?�하?�요';
-                    showToast('?��?지�??�로?�하�?변경할 ?�용???�력?�세?? (Pro/Business ?�용)', 'info');
+                    document.getElementById('modeDescription').innerHTML = '🔄 <b>이미지 편집</b>: 업로드한 이미지를 직접 수정<br>배경 변경, 스타일 변환, 색상 수정 등';
+                    document.getElementById('uploadHint').textContent = '편집할 이미지를 업로드하세요';
+                    showToast('이미지를 업로드하고 변경할 내용을 입력하세요. (Pro/Business 전용)', 'info');
                     selectFlux2Pro();
-                    // Pro/Business�?모델 ?�택 ?�시
+                    // Pro/Business면 모델 선택 표시
                     const userPlan = authState.subscription?.plan || authState.user?.plan || 'free';
                     if (authState.isLoggedIn && ['pro', 'business'].includes(userPlan)) {
                         document.getElementById('modelSelectSection').style.display = 'block';
                     }
                 }
                 
-                // AI ?�팅 모드 (Virtual Try-On)
+                // AI 피팅 모드 (Virtual Try-On)
                 if (state.mode === 'tryon') {
                     document.getElementById('uploadZone').style.display = 'none';
                     document.getElementById('uploadPreview').style.display = 'none';
                     document.getElementById('tryonSection').style.display = 'block';
-                    document.getElementById('modelSelectSection').style.display = 'none';  // 모델 ?�택 ?��?
-                    promptInput.style.display = 'none';  // ?�롬?�트 불필??
+                    document.getElementById('modelSelectSection').style.display = 'none';  // 모델 선택 숨김
+                    promptInput.style.display = 'none';  // 프롬프트 불필요
                     document.getElementById('modeDescription').style.display = 'block';
-                    document.getElementById('modeDescription').innerHTML = '?�� <b>AI ?�팅 (Virtual Try-On)</b>: 캐릭???�람 ?��?지???�을 ?�힙?�다<br>IDM-VTON 모델 ?�용 ??Pro/Business ?�용 ??$0.034/??;
-                    showToast('캐릭???��?지?� ???��?지�?각각 ?�로?�하?�요. (Pro/Business ?�용)', 'info');
+                    document.getElementById('modeDescription').innerHTML = '👗 <b>AI 피팅 (Virtual Try-On)</b>: 캐릭터/사람 이미지에 옷을 입힙니다<br>IDM-VTON 모델 사용 • Pro/Business 전용 • $0.034/회';
+                    showToast('캐릭터 이미지와 옷 이미지를 각각 업로드하세요. (Pro/Business 전용)', 'info');
                 }
                 else {
                     document.getElementById('tryonSection').style.display = 'none';
@@ -2335,14 +2321,14 @@
             });
         });
         
-        // Try-On ?�태 관�?
+        // Try-On 상태 관리
         let tryonState = {
             humanImage: null,
             garmentImage: null,
             category: 'upper_body'
         };
         
-        // Try-On 카테고리 ?�택
+        // Try-On 카테고리 선택
         document.querySelectorAll('.tryon-options .tag-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tryon-options .tag-btn').forEach(b => b.classList.remove('active'));
@@ -2351,7 +2337,7 @@
             });
         });
         
-        // FLUX 2 Pro ?�택 ?�수
+        // FLUX 2 Pro 선택 함수
         function selectFlux2Pro() {
             const flux2ProOption = document.querySelector('.model-option[data-model="flux-2-pro"]');
             if (flux2ProOption) {
@@ -2362,7 +2348,7 @@
             }
         }
 
-        // ?��????�리???�택
+        // 스타일 프리셋 선택
         document.querySelectorAll('.style-preset').forEach(preset => {
             preset.addEventListener('click', () => {
                 document.querySelectorAll('.style-preset').forEach(p => p.classList.remove('active'));
@@ -2372,7 +2358,7 @@
             });
         });
 
-        // ?�그 ?�택
+        // 태그 선택
         document.querySelectorAll('.builder-tag').forEach(tag => {
             tag.addEventListener('click', () => {
                 tag.classList.toggle('selected');
@@ -2388,7 +2374,7 @@
             });
         });
 
-        // ?�이�??�택
+        // 사이즈 선택
         document.querySelectorAll('.size-preset').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('active'));
@@ -2398,13 +2384,13 @@
             });
         });
 
-        // 멀???�이�??��?
+        // 멀티 사이즈 토글
         document.getElementById('multiSizeToggle').addEventListener('click', function() {
             this.classList.toggle('active');
             state.multiSize = this.classList.contains('active');
         });
 
-        // ?�일 ?�로??
+        // 파일 업로드
         uploadZone.addEventListener('click', () => fileInput.click());
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -2438,25 +2424,25 @@
             fileInput.value = '';
         });
 
-        // AI ?�롬?�트 최적??(?�버 Argos Translate ?�용 - 무제??무료)
+        // AI 프롬프트 최적화 (서버 Argos Translate 사용 - 무제한 무료)
         optimizeBtn.addEventListener('click', async () => {
             const prompt = promptInput.value.trim();
             if (!prompt) {
-                showToast('?�롬?�트�?먼�? ?�력?�주?�요!', 'error');
+                showToast('프롬프트를 먼저 입력해주세요!', 'error');
                 return;
             }
             
-            // ?��????�함?�어 ?�는지 ?�인
+            // 한글이 포함되어 있는지 확인
             if (!containsKorean(prompt)) {
-                showToast('?�어 ?�롬?�트???��? 최적?�되???�습?�다!', 'success');
+                showToast('영어 프롬프트는 이미 최적화되어 있습니다!', 'success');
                 return;
             }
             
             optimizeBtn.disabled = true;
-            optimizeBtn.innerHTML = '<div class="spinner"></div><span>AI 번역 �?..</span>';
+            optimizeBtn.innerHTML = '<div class="spinner"></div><span>AI 번역 중...</span>';
             
             try {
-                // ?�버 번역 API ?�용 (Argos Translate - 무제??
+                // 서버 번역 API 사용 (Argos Translate - 무제한)
                 const response = await fetch(`${API_URL}/api/translate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2471,7 +2457,7 @@
                 if (data.success && data.translated) {
                     let translatedPrompt = data.translated;
                     
-                    // ?�택???�그 추�? (?�버?�서 ?��??��? ?��? 추�???
+                    // 선택된 태그 추가 (서버에서 스타일은 이미 추가됨)
                     if (state.selectedTags.length > 0) {
                         translatedPrompt = translatedPrompt + ', ' + state.selectedTags.join(', ');
                     }
@@ -2480,29 +2466,28 @@
                     optimizedText.textContent = translatedPrompt;
                     optimizedPromptEl.classList.add('active');
                     
-                    showToast('??AI가 ?�롬?�트�??�어�?번역?�습?�다!', 'success');
-
+                    showToast('✨ AI가 프롬프트를 영어로 번역했습니다!', 'success');
                 } else {
-                    throw new Error(data.error || '번역 ?�패');
+                    throw new Error(data.error || '번역 실패');
                 }
             } catch (error) {
-                console.error('번역 ?�류:', error);
+                console.error('번역 오류:', error);
                 
-                // ?�백: ?�전 기반 변??
-                showToast('?�️ ?�버 번역 ?�패, 기본 변???�용', 'error');
+                // 폴백: 사전 기반 변환
+                showToast('⚠️ 서버 번역 실패, 기본 변환 사용', 'error');
                 const fallbackPrompt = optimizeKoreanPrompt(prompt);
                 state.optimizedPrompt = fallbackPrompt;
                 optimizedText.textContent = fallbackPrompt;
                 optimizedPromptEl.classList.add('active');
             } finally {
                 optimizeBtn.disabled = false;
-                optimizeBtn.innerHTML = '<span>?��</span><span>AI ?�롬?�트 최적??/span>';
+                optimizeBtn.innerHTML = '<span>🧠</span><span>AI 프롬프트 최적화</span>';
             }
         });
 
-        // ?��?지 ?�성
+        // 이미지 생성
         generateBtn.addEventListener('click', async () => {
-            // 1. ?�성 가???��? 체크 (?�용???�한)
+            // 1. 생성 가능 여부 체크 (사용량 제한)
             if (!canGenerate()) {
                 return;
             }
@@ -2515,31 +2500,29 @@
 
             let prompt = promptInput.value.trim();
             if (!prompt) {
-                showToast('?�롬?�트�??�력?�주?�요!', 'error');
+                showToast('프롬프트를 입력해주세요!', 'error');
                 return;
             }
             
-            // ?��????�함?�어 ?�으�??�동 번역
+            // 한글이 포함되어 있으면 자동 번역
             let finalPrompt;
             if (containsKorean(prompt)) {
-                // ?��? 최적?�된 ?�롬?�트가 ?�으�??�용
+                // 이미 최적화된 프롬프트가 있으면 사용
                 if (state.optimizedPrompt) {
                     finalPrompt = state.optimizedPrompt;
-
                 } else {
-                    // ?��? ???�어 ?�동 번역
+                    // 한글 → 영어 자동 번역
                     generateBtn.disabled = true;
-                    generateBtn.innerHTML = '<div class="spinner"></div><span>?��? 번역 �?..</span>';
+                    generateBtn.innerHTML = '<div class="spinner"></div><span>한글 번역 중...</span>';
                     
                     finalPrompt = optimizeKoreanPrompt(prompt);
-
                     
-                    // 번역???�롬?�트 UI???�시
+                    // 번역된 프롬프트 UI에 표시
                     optimizedText.textContent = finalPrompt;
                     optimizedPromptEl.classList.add('active');
                 }
             } else {
-                // ?�어??경우?�도 ?��????�그 추�?
+                // 영어인 경우에도 스타일/태그 추가
                 finalPrompt = prompt;
                 if (state.stylePrompt) {
                     finalPrompt += ', ' + state.stylePrompt;
@@ -2549,9 +2532,7 @@
                 }
             }
             
-
-            
-            // ?�성???�이�?목록
+            // 생성할 사이즈 목록
             const sizes = state.multiSize 
                 ? [
                     { width: 1024, height: 1024, label: '1:1' },
@@ -2560,14 +2541,14 @@
                   ]
                 : [{ width: state.width, height: state.height, label: `${state.width}x${state.height}` }];
             
-            // UI ?�데?�트
+            // UI 업데이트
             generateBtn.disabled = true;
-            generateBtn.innerHTML = '<div class="spinner"></div><span>?�성 �?..</span>';
+            generateBtn.innerHTML = '<div class="spinner"></div><span>생성 중...</span>';
             progressSection.classList.add('active');
             statusDot.classList.add('processing');
             state.images = [];
             
-            // 결과 그리??초기??
+            // 결과 그리드 초기화
             resultGrid.innerHTML = '';
             sizes.forEach((size, i) => {
                 resultGrid.innerHTML += `
@@ -2594,12 +2575,12 @@
                     progressFill.style.width = `${progress}%`;
                     progressPercent.textContent = `${Math.round(progress)}%`;
                     
-                    // 모드�?처리
+                    // 모드별 처리
                     const isEditMode = state.mode === 'transform' && state.uploadedImage;
-                    const modeText = isEditMode ? '?�집' : '?�성';
-                    progressLabel.textContent = `?��?지 ${i + 1}/${sizes.length} ${modeText} �?.. (${size.label})`;
+                    const modeText = isEditMode ? '편집' : '생성';
+                    progressLabel.textContent = `이미지 ${i + 1}/${sizes.length} ${modeText} 중... (${size.label})`;
                     
-                    // API ?�청 ?�이??
+                    // API 요청 데이터
                     const requestData = {
                         prompt: finalPrompt,
                         type: 'custom',
@@ -2608,14 +2589,14 @@
                         model: state.selectedModel
                     };
                     
-                    // ?��?지 ?�집 모드
+                    // 이미지 편집 모드
                     if (isEditMode) {
                         requestData.input_image = state.uploadedImage;
                         requestData.edit_mode = true;
                         requestData.model = 'flux-2-pro';
                     }
                     
-                    // ?�증 ?�큰 ?�함?�여 ?�청
+                    // 인증 토큰 포함하여 요청
                     const token = localStorage.getItem('kampai_token');
                     const headers = { 'Content-Type': 'application/json' };
                     if (token) {
@@ -2631,10 +2612,10 @@
                     const data = await response.json();
                     
                     if (data.success && data.images?.length > 0) {
-                        // Replicate API: ?�체 URL 반환 / ComfyUI: 로컬 ?�일�?반환
+                        // Replicate API: 전체 URL 반환 / ComfyUI: 로컬 파일명 반환
                         let imageUrl = data.images[0];
                         
-                        // 로컬 ?�일명인 경우 (ComfyUI) API URL�?변??
+                        // 로컬 파일명인 경우 (ComfyUI) API URL로 변환
                         if (!imageUrl.startsWith('http')) {
                             const filename = imageUrl.split(/[/\\]/).pop();
                             imageUrl = `${API_URL}/api/image/${encodeURIComponent(filename)}`;
@@ -2642,7 +2623,7 @@
                         
                         state.images.push({ url: imageUrl, filename: imageUrl.split('/').pop(), size: size.label });
                         
-                        // ?�스?�리???�??
+                        // 히스토리에 저장
                         addToHistory({
                             url: imageUrl,
                             prompt: finalPrompt,
@@ -2656,48 +2637,48 @@
                             <div class="image-overlay">
                                 <div class="overlay-actions">
                                     <button class="overlay-btn" onclick="downloadImage('${imageUrl}', 'kampai_${size.label}_${Date.now()}.png')">
-                                        �??�운로드
+                                        ⬇ 다운로드
                                     </button>
                                     <button class="overlay-btn" onclick="window.open('${imageUrl}', '_blank')">
-                                        ?�� ?��?
+                                        🔍 확대
                                     </button>
                                 </div>
                             </div>
                         `;
                     } else {
-                        throw new Error(data.error || '?�성 ?�패');
+                        throw new Error(data.error || '생성 실패');
                     }
                 }
                 
-                // ?�료
+                // 완료
                 progressFill.style.width = '100%';
                 progressPercent.textContent = '100%';
-                progressLabel.textContent = '???�성 ?�료!';
-                resultCount.textContent = `${sizes.length}??;
-                showToast(`${sizes.length}?�의 ?��?지가 ?�성?�었?�니??`, 'success');
+                progressLabel.textContent = '✨ 생성 완료!';
+                resultCount.textContent = `${sizes.length}장`;
+                showToast(`${sizes.length}장의 이미지가 생성되었습니다!`, 'success');
                 
-                // ?�용??기록
+                // 사용량 기록
                 if (authState.isLoggedIn) {
                     await recordUsage();
                 } else {
                     recordGuestUsage();
                     const remaining = 3 - parseInt(localStorage.getItem('kampai_guest_count') || '0');
                     if (remaining > 0) {
-                        showToast(`무료 체험 ${remaining}???�았?�니?? 로그?�하�???많�? 기능???�용?????�어??`, 'info');
+                        showToast(`무료 체험 ${remaining}회 남았습니다. 로그인하면 더 많은 기능을 사용할 수 있어요!`, 'info');
                     }
                 }
                 
             } catch (error) {
                 console.error(error);
-                showToast('?�류: ' + error.message, 'error');
+                showToast('오류: ' + error.message, 'error');
             } finally {
                 generateBtn.disabled = false;
-                generateBtn.innerHTML = '<span>??/span><span>?��?지 ?�성</span>';
+                generateBtn.innerHTML = '<span>⚡</span><span>이미지 생성</span>';
                 statusDot.classList.remove('processing');
             }
         });
 
-        // ?�운로드 ?�수
+        // 다운로드 함수
         function downloadImage(url, filename) {
             const a = document.createElement('a');
             a.href = url;
@@ -2707,13 +2688,13 @@
             document.body.removeChild(a);
         }
 
-        // ?�스???�림
+        // 토스트 알림
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <span>${type === 'success' ? '?? : '??}</span>
+                <span>${type === 'success' ? '✅' : '❌'}</span>
                 <span>${message}</span>
             `;
             container.appendChild(toast);
@@ -2725,29 +2706,29 @@
             }, 3000);
         }
 
-        // Virtual Try-On 처리 ?�수
+        // Virtual Try-On 처리 함수
         async function handleTryOn() {
             if (!tryonState.humanImage) {
-                showToast('캐릭???�람 ?��?지�??�로?�해주세??', 'error');
+                showToast('캐릭터/사람 이미지를 업로드해주세요!', 'error');
                 return;
             }
             
             if (!tryonState.garmentImage) {
-                showToast('???��?지�??�로?�해주세??', 'error');
+                showToast('옷 이미지를 업로드해주세요!', 'error');
                 return;
             }
             
             const garmentDescription = document.getElementById('garmentDescription')?.value || 'clothing item';
             
-            // UI ?�데?�트
+            // UI 업데이트
             generateBtn.disabled = true;
-            generateBtn.innerHTML = '<div class="spinner"></div><span>???�히??�?.. (15-25�?</span>';
+            generateBtn.innerHTML = '<div class="spinner"></div><span>옷 입히는 중... (15-25초)</span>';
             progressSection.classList.add('active');
             progressFill.style.width = '20%';
-            progressLabel.textContent = '?�� Virtual Try-On 처리 �?.. (IDM-VTON)';
+            progressLabel.textContent = '👗 Virtual Try-On 처리 중... (IDM-VTON)';
             statusDot.classList.add('processing');
             
-            // 결과 그리??초기??
+            // 결과 그리드 초기화
             resultGrid.innerHTML = `
                 <div class="result-card" id="result-tryon">
                     <div class="result-image">
@@ -2765,7 +2746,7 @@
             `;
             
             try {
-                // ?�로그레???�니메이??
+                // 프로그레스 애니메이션
                 let progress = 20;
                 const progressInterval = setInterval(() => {
                     if (progress < 90) {
@@ -2775,7 +2756,7 @@
                     }
                 }, 1500);
                 
-                // ?�증 ?�큰
+                // 인증 토큰
                 const token = localStorage.getItem('kampai_token');
                 const headers = { 'Content-Type': 'application/json' };
                 if (token) {
@@ -2800,7 +2781,7 @@
                 if (data.success && data.images?.length > 0) {
                     const imageUrl = data.images[0];
                     
-                    // ?�스?�리???�??
+                    // 히스토리에 저장
                     addToHistory({
                         url: imageUrl,
                         prompt: `Try-On: ${garmentDescription}`,
@@ -2814,10 +2795,10 @@
                         <div class="image-overlay">
                             <div class="overlay-actions">
                                 <button class="overlay-btn" onclick="downloadImage('${imageUrl}', 'kampai_tryon_${Date.now()}.png')">
-                                    �??�운로드
+                                    ⬇ 다운로드
                                 </button>
                                 <button class="overlay-btn" onclick="window.open('${imageUrl}', '_blank')">
-                                    ?�� ?��?
+                                    🔍 확대
                                 </button>
                             </div>
                         </div>
@@ -2825,39 +2806,39 @@
                     
                     progressFill.style.width = '100%';
                     progressPercent.textContent = '100%';
-                    progressLabel.textContent = '??AI ?�팅 ?�료!';
-                    resultCount.textContent = '1??;
-                    showToast(`AI ?�팅 ?�료! (${data.time_taken || '?'}�? $${data.cost || 0.034})`, 'success');
+                    progressLabel.textContent = '✨ AI 피팅 완료!';
+                    resultCount.textContent = '1장';
+                    showToast(`AI 피팅 완료! (${data.time_taken || '?'}초, $${data.cost || 0.034})`, 'success');
                     
-                    // ?�용??기록
+                    // 사용량 기록
                     if (authState.isLoggedIn) {
                         await recordUsage();
                     }
                 } else {
-                    throw new Error(data.error || 'Virtual Try-On ?�패');
+                    throw new Error(data.error || 'Virtual Try-On 실패');
                 }
             } catch (error) {
-                console.error('Try-On ?�류:', error);
-                showToast(error.message || 'Virtual Try-On ?�패', 'error');
+                console.error('Try-On 오류:', error);
+                showToast(error.message || 'Virtual Try-On 실패', 'error');
                 
                 const card = document.getElementById('result-tryon');
                 if (card) {
                     card.querySelector('.result-image').innerHTML = `
                         <div class="placeholder">
-                            <div class="placeholder-icon">??/div>
-                            <div>${error.message || '?�류 발생'}</div>
+                            <div class="placeholder-icon">❌</div>
+                            <div>${error.message || '오류 발생'}</div>
                         </div>
                     `;
                 }
             } finally {
                 generateBtn.disabled = false;
-                generateBtn.innerHTML = '<span class="btn-icon">?��</span><span>?�성?�기</span>';
+                generateBtn.innerHTML = '<span class="btn-icon">🎨</span><span>생성하기</span>';
                 statusDot.classList.remove('processing');
                 setTimeout(() => progressSection.classList.remove('active'), 2000);
             }
         }
 
-        // ?�보???�축??
+        // 키보드 단축키
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'Enter') {
                 generateBtn.click();
@@ -2865,60 +2846,58 @@
         });
     </script>
     
-    <!-- 마이?�이지 모달 -->
+    <!-- 마이페이지 모달 -->
     <div id="accountModalOverlay" class="account-modal-overlay">
         <div class="account-modal">
             <div class="account-modal-header">
-                <h3>?�� ??계정</h3>
+                <h3>👤 내 계정</h3>
                 <button onclick="closeAccountModal()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">&times;</button>
             </div>
             
             <div class="account-info">
                 <div class="account-info-item">
-                    <span class="account-info-label">?�메??/span>
+                    <span class="account-info-label">이메일</span>
                     <span class="account-info-value" id="modalAccountEmail">-</span>
                 </div>
                 <div class="account-info-item">
-                    <span class="account-info-label">?�랜</span>
+                    <span class="account-info-label">플랜</span>
                     <span class="account-info-value" id="modalAccountPlan">-</span>
                 </div>
                 <div class="account-info-item">
-                    <span class="account-info-label">?�금</span>
+                    <span class="account-info-label">요금</span>
                     <span class="account-info-value" id="modalAccountPrice">-</span>
                 </div>
                 <div class="account-info-item">
-                    <span class="account-info-label">?�일 ?�성??/span>
+                    <span class="account-info-label">일일 생성량</span>
                     <span class="account-info-value" id="modalAccountLimit">-</span>
                 </div>
             </div>
             
             <div id="cancelSubBtnContainer" style="display:none;">
                 <button onclick="cancelSubscription()" class="cancel-sub-btn">
-                    ?�️ 구독 취소
+                    ⚠️ 구독 취소
                 </button>
             </div>
         </div>
     </div>
     
     <script>
-        // 마이?�이지 모달 ?�기
+        // 마이페이지 모달 열기
         function openAccountModal() {
             const plan = authState.subscription?.plan || authState.user?.plan || 'free';
             const planInfo = {
-                'free': { name: 'Free', price: 0, daily: '3?? },
-                'basic': { name: 'Basic', price: 4900, daily: '30?? },
-                'pro': { name: 'Pro', price: 19900, daily: '100?? },
-                'business': { name: 'Business', price: 99000, daily: '500?? }
-            }[plan] || { name: 'Free', price: 0, daily: '3?? };
-            
-
+                'free': { name: 'Free', price: 0, daily: '3장' },
+                'basic': { name: 'Basic', price: 4900, daily: '30장' },
+                'pro': { name: 'Pro', price: 19900, daily: '100장' },
+                'business': { name: 'Business', price: 99000, daily: '500장' }
+            }[plan] || { name: 'Free', price: 0, daily: '3장' };
             
             document.getElementById('modalAccountEmail').textContent = authState.user?.email || '-';
             document.getElementById('modalAccountPlan').textContent = planInfo.name;
-            document.getElementById('modalAccountPrice').textContent = planInfo.price > 0 ? `??{planInfo.price.toLocaleString()}/?? : '무료';
-            document.getElementById('modalAccountLimit').textContent = planInfo.daily + '/??;
+            document.getElementById('modalAccountPrice').textContent = planInfo.price > 0 ? `₩${planInfo.price.toLocaleString()}/월` : '무료';
+            document.getElementById('modalAccountLimit').textContent = planInfo.daily + '/일';
             
-            // ?�료 ?�랜?�면 취소 버튼 ?�시
+            // 유료 플랜이면 취소 버튼 표시
             if (plan !== 'free') {
                 document.getElementById('cancelSubBtnContainer').style.display = 'block';
             } else {
@@ -2928,14 +2907,14 @@
             document.getElementById('accountModalOverlay').classList.add('active');
         }
         
-        // 마이?�이지 모달 ?�기
+        // 마이페이지 모달 닫기
         function closeAccountModal() {
             document.getElementById('accountModalOverlay').classList.remove('active');
         }
         
         // 구독 취소
         async function cancelSubscription() {
-            if (!confirm('?�말 구독??취소?�시겠습?�까?\n무료 ?�랜?�로 변경됩?�다.')) {
+            if (!confirm('정말 구독을 취소하시겠습니까?\n무료 플랜으로 변경됩니다.')) {
                 return;
             }
             
@@ -2951,22 +2930,22 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast('구독??취소?�었?�니??, 'success');
+                    showToast('구독이 취소되었습니다', 'success');
                     authState.subscription.plan = 'free';
                     if (authState.user) authState.user.plan = 'free';
                     localStorage.setItem('kampai_user', JSON.stringify(authState.user));
                     closeAccountModal();
                     updateAuthUI();
                 } else {
-                    showToast(data.error || '구독 취소 ?�패', 'error');
+                    showToast(data.error || '구독 취소 실패', 'error');
                 }
             } catch (error) {
                 console.error('Cancel subscription failed:', error);
-                showToast('구독 취소 �??�류가 발생?�습?�다', 'error');
+                showToast('구독 취소 중 오류가 발생했습니다', 'error');
             }
         }
         
-        // 모달 ?��? ?�릭???�기
+        // 모달 외부 클릭시 닫기
         document.getElementById('accountModalOverlay').addEventListener('click', (e) => {
             if (e.target.id === 'accountModalOverlay') {
                 closeAccountModal();
