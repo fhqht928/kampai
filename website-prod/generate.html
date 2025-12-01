@@ -2389,7 +2389,7 @@
             fileInput.value = '';
         });
 
-        // AI 프롬프트 최적화 (MyMemory 무료 번역 API 사용)
+        // AI 프롬프트 최적화 (서버 Argos Translate 사용 - 무제한 무료)
         optimizeBtn.addEventListener('click', async () => {
             const prompt = promptInput.value.trim();
             if (!prompt) {
@@ -2407,28 +2407,24 @@
             optimizeBtn.innerHTML = '<div class="spinner"></div><span>AI 번역 중...</span>';
             
             try {
-                // MyMemory 무료 번역 API 사용
-                const response = await fetch(
-                    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(prompt)}&langpair=ko|en`
-                );
+                // 서버 번역 API 사용 (Argos Translate - 무제한)
+                const response = await fetch(`${API_URL}/api/translate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: prompt,
+                        style: state.style || ''
+                    })
+                });
+                
                 const data = await response.json();
                 
-                if (data.responseStatus === 200 && data.responseData?.translatedText) {
-                    let translatedPrompt = data.responseData.translatedText;
+                if (data.success && data.translated) {
+                    let translatedPrompt = data.translated;
                     
-                    // 선택된 스타일 프리셋 추가
-                    if (state.stylePrompt) {
-                        translatedPrompt = translatedPrompt + ', ' + state.stylePrompt;
-                    }
-                    
-                    // 선택된 태그 추가
+                    // 선택된 태그 추가 (서버에서 스타일은 이미 추가됨)
                     if (state.selectedTags.length > 0) {
                         translatedPrompt = translatedPrompt + ', ' + state.selectedTags.join(', ');
-                    }
-                    
-                    // 기본 품질 태그 추가
-                    if (!translatedPrompt.toLowerCase().includes('quality') && !translatedPrompt.toLowerCase().includes('detailed')) {
-                        translatedPrompt += ', high quality, detailed';
                     }
                     
                     state.optimizedPrompt = translatedPrompt;
@@ -2438,13 +2434,13 @@
                     showToast('✨ AI가 프롬프트를 영어로 번역했습니다!', 'success');
                     console.log('📝 번역 결과:', translatedPrompt);
                 } else {
-                    throw new Error('번역 실패');
+                    throw new Error(data.error || '번역 실패');
                 }
             } catch (error) {
                 console.error('번역 오류:', error);
                 
                 // 폴백: 사전 기반 변환
-                showToast('⚠️ 번역 서버 연결 실패, 기본 변환 사용', 'error');
+                showToast('⚠️ 서버 번역 실패, 기본 변환 사용', 'error');
                 const fallbackPrompt = optimizeKoreanPrompt(prompt);
                 state.optimizedPrompt = fallbackPrompt;
                 optimizedText.textContent = fallbackPrompt;

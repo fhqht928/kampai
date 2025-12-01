@@ -132,13 +132,62 @@ def health_check():
 
 
 # ============================================
-# Ollama 한글 → 영어 프롬프트 번역 API
+# Argos Translate 한글 → 영어 번역 API (무제한 무료)
 # ============================================
+
+# Argos Translate 초기화 (서버 시작 시 한 번만)
+argos_translator = None
+
+def init_argos_translate():
+    """Argos Translate 초기화 및 한국어→영어 모델 로드"""
+    global argos_translator
+    if argos_translator is not None:
+        return argos_translator
+    
+    try:
+        import argostranslate.package
+        import argostranslate.translate
+        
+        # 사용 가능한 패키지 업데이트
+        argostranslate.package.update_package_index()
+        available_packages = argostranslate.package.get_available_packages()
+        
+        # 한국어 → 영어 패키지 찾기
+        ko_en_package = next(
+            (pkg for pkg in available_packages 
+             if pkg.from_code == "ko" and pkg.to_code == "en"),
+            None
+        )
+        
+        if ko_en_package:
+            # 패키지 다운로드 및 설치 (이미 설치되어 있으면 스킵)
+            installed_packages = argostranslate.package.get_installed_packages()
+            is_installed = any(
+                pkg.from_code == "ko" and pkg.to_code == "en" 
+                for pkg in installed_packages
+            )
+            
+            if not is_installed:
+                print("📥 한국어→영어 번역 모델 다운로드 중...")
+                argostranslate.package.install_from_path(ko_en_package.download())
+                print("✅ 번역 모델 설치 완료!")
+            
+            # 번역기 로드
+            argos_translator = argostranslate.translate.get_translation_from_codes("ko", "en")
+            print("🌐 Argos Translate 초기화 완료 (한국어→영어)")
+            return argos_translator
+        else:
+            print("⚠️ 한국어→영어 번역 패키지를 찾을 수 없습니다")
+            return None
+    except Exception as e:
+        print(f"⚠️ Argos Translate 초기화 실패: {e}")
+        return None
+
 
 @app.route('/api/translate', methods=['POST'])
 def translate_prompt():
     """
-    한글 프롬프트를 Ollama LLM으로 영어 이미지 생성 프롬프트로 변환
+    한글 프롬프트를 Argos Translate로 영어로 번역 (무제한 무료)
     """
     data = request.json
     korean_text = data.get("text", "").strip()
@@ -150,106 +199,78 @@ def translate_prompt():
             "error": "텍스트를 입력해주세요."
         }), 400
     
-    # Ollama 서버 확인
-    try:
-        resp = requests.get(f"{OLLAMA_URL}/api/tags", timeout=2)
-        if resp.status_code != 200:
-            raise Exception("Ollama not running")
-    except:
-        return jsonify({
-            "success": False,
-            "error": "Ollama 서버가 실행 중이 아닙니다. 'ollama serve' 명령으로 시작해주세요."
-        }), 503
-    
-    # LLM 프롬프트 구성 - FLUX 모델에 실제로 잘 되는 스타일들
+    # 스타일 키워드
     style_keywords = {
-        "realistic": "photorealistic, ultra realistic, 8k uhd, dslr, professional photography, sharp focus",
-        "3d": "3d render, octane render, unreal engine 5, cinema 4d, ray tracing, polished",
+        "realistic": "photorealistic, ultra realistic, 8k uhd, dslr, professional photography",
+        "3d": "3d render, octane render, unreal engine 5, cinema 4d, ray tracing",
         "digitalart": "digital art, digital painting, artstation trending, detailed illustration",
         "concept": "concept art, illustration, matte painting, cinematic, epic composition",
-        "cyberpunk": "cyberpunk, neon lights, futuristic city, dark atmosphere, sci-fi, blade runner",
+        "cyberpunk": "cyberpunk, neon lights, futuristic city, dark atmosphere, sci-fi",
         "fantasy": "fantasy art, magical, epic, ethereal lighting, mystical atmosphere",
         "anime": "anime style, anime artwork, japanese animation, cel shading, vibrant",
-        "oilpaint": "oil painting, classical art, renaissance style, visible brush strokes, masterpiece",
+        "oilpaint": "oil painting, classical art, renaissance style, visible brush strokes",
         "minimal": "minimalist, clean design, simple composition, negative space, modern"
     }
     
     style_prefix = style_keywords.get(style.lower(), "") if style else ""
     
-    system_prompt = """You are a prompt engineer for AI image generation. Your job is to translate Korean to a SHORT, CONCISE English prompt.
-
-CRITICAL RULES:
-- Output ONLY 15-30 words maximum
-- Output format: [subject doing action], [key visual details]
-- DO NOT add style words - they are handled separately
-- DO NOT add "high quality", "detailed", "masterpiece" - already added
-- NO explanations, NO quotes, JUST the prompt
-- Keep it simple and direct
-
-GOOD example: "a man eating black bean noodles at a table, chopsticks, steaming bowl"
-BAD example: "A man enjoying a plate of jjajangmyeon in a serene, dreamy atmosphere, reminiscent of a classic scene..." (TOO LONG)"""
-
-    user_prompt = f"""Translate to SHORT English (15-30 words max):
-Korean: {korean_text}
-Prompt:"""
-
     try:
-        # Ollama API 호출
-        response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={
-                "model": "llama3.1:8b",
-                "prompt": user_prompt,
-                "system": system_prompt,
-                "stream": False,
-                "options": {
-                    "temperature": 0.7,
-                    "top_p": 0.9,
-                    "num_predict": 300
-                }
-            },
-            timeout=60
-        )
+        # Argos Translate로 번역
+        translator = init_argos_translate()
         
-        if response.status_code == 200:
-            result = response.json()
-            translated = result.get("response", "").strip()
-            
-            # 불필요한 따옴표나 설명 제거
-            translated = translated.strip('"\'')
-            if translated.lower().startswith("english prompt:"):
-                translated = translated[15:].strip()
-            if translated.lower().startswith("here"):
-                # "Here is the prompt:" 같은 설명 제거
-                lines = translated.split('\n')
-                translated = '\n'.join(lines[1:]).strip() if len(lines) > 1 else translated
-            if translated.lower().startswith("prompt:"):
-                translated = translated[7:].strip()
-            
-            # 스타일 키워드를 앞에 붙이기 (핵심!)
-            if style_prefix:
-                translated = f"{style_prefix}, {translated}, masterpiece, best quality"
-            else:
-                translated = f"{translated}, high quality, detailed"
-            
-            return jsonify({
-                "success": True,
-                "original": korean_text,
-                "translated": translated,
-                "model": "llama3.1:8b",
-                "style_applied": style if style else "none"
-            })
+        if translator:
+            translated = translator.translate(korean_text)
         else:
-            return jsonify({
-                "success": False,
-                "error": f"Ollama 응답 오류: {response.status_code}"
-            }), 500
-            
-    except requests.exceptions.Timeout:
+            # 폴백: 개발 환경에서 Ollama 사용 시도
+            if not IS_PRODUCTION:
+                try:
+                    resp = requests.get(f"{OLLAMA_URL}/api/tags", timeout=2)
+                    if resp.status_code == 200:
+                        # Ollama 사용
+                        response = requests.post(
+                            f"{OLLAMA_URL}/api/generate",
+                            json={
+                                "model": "llama3.1:8b",
+                                "prompt": f"Translate to English (short, 15-30 words): {korean_text}",
+                                "stream": False,
+                                "options": {"temperature": 0.7, "num_predict": 100}
+                            },
+                            timeout=30
+                        )
+                        if response.status_code == 200:
+                            translated = response.json().get("response", "").strip().strip('"\'')
+                        else:
+                            raise Exception("Ollama failed")
+                    else:
+                        raise Exception("Ollama not available")
+                except:
+                    return jsonify({
+                        "success": False,
+                        "error": "번역 서비스를 사용할 수 없습니다."
+                    }), 503
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": "번역 서비스를 사용할 수 없습니다."
+                }), 503
+        
+        # 불필요한 문자 정리
+        translated = translated.strip('"\'')
+        
+        # 스타일 키워드 추가
+        if style_prefix:
+            translated = f"{style_prefix}, {translated}, masterpiece, best quality"
+        else:
+            translated = f"{translated}, high quality, detailed"
+        
         return jsonify({
-            "success": False,
-            "error": "번역 시간이 초과되었습니다. 다시 시도해주세요."
-        }), 504
+            "success": True,
+            "original": korean_text,
+            "translated": translated,
+            "model": "argos-translate",
+            "style_applied": style if style else "none"
+        })
+            
     except Exception as e:
         return jsonify({
             "success": False,
