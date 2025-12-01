@@ -2,7 +2,7 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "python server.py"
+startCommand = "gunicorn server:app --bind 0.0.0.0:5000 --workers 2 --timeout 120"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 
