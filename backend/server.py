@@ -647,13 +647,16 @@ def virtual_tryon():
     if not garment_image:
         return jsonify({"success": False, "error": "옷 이미지를 업로드해주세요"}), 400
     
-    # 플랜 확인 - 개발 테스트를 위해 비활성화
-    # TODO: 프로덕션 배포 시 플랜 체크 활성화
-    # user_plan = "free"
-    # if hasattr(request, 'user') and request.user:
-    #     user_plan = request.user.get('plan', 'free')
-    # if user_plan not in ['pro', 'business']:
-    #     return jsonify({"success": False, "error": "Virtual Try-On은 Pro/Business 플랜에서만 사용 가능합니다"}), 403
+    # 플랜 확인 - Pro/Business만 사용 가능
+    user_plan = "free"
+    if hasattr(request, 'user') and request.user:
+        user_plan = request.user.get('plan', 'free')
+    if user_plan not in ['pro', 'business']:
+        return jsonify({
+            "success": False, 
+            "error": "AI 피팅 기능은 Pro/Business 플랜에서만 사용 가능합니다. 플랜을 업그레이드해주세요!",
+            "upgrade_required": True
+        }), 403
     
     # Replicate API 확인
     if not replicate_client.is_configured():
@@ -717,13 +720,16 @@ def outfit_character():
     if not prompt:
         return jsonify({"success": False, "error": "프롬프트를 입력해주세요"}), 400
     
-    # 플랜 확인 - 개발 테스트를 위해 비활성화
-    # TODO: 프로덕션 배포 시 플랜 체크 활성화
-    # user_plan = "free"
-    # if hasattr(request, 'user') and request.user:
-    #     user_plan = request.user.get('plan', 'free')
-    # if user_plan not in ['pro', 'business']:
-    #     return jsonify({"success": False, "error": "의상 캐릭터 생성은 Pro/Business 플랜에서만 사용 가능합니다"}), 403
+    # 플랜 확인 - Pro/Business만 사용 가능
+    user_plan = "free"
+    if hasattr(request, 'user') and request.user:
+        user_plan = request.user.get('plan', 'free')
+    if user_plan not in ['pro', 'business']:
+        return jsonify({
+            "success": False, 
+            "error": "의상 캐릭터 생성은 Pro/Business 플랜에서만 사용 가능합니다. 플랜을 업그레이드해주세요!",
+            "upgrade_required": True
+        }), 403
     
     # Replicate API 확인
     if not replicate_client.is_configured():
