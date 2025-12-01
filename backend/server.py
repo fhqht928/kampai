@@ -489,30 +489,30 @@ def generate_image():
     - 개발 모드: ComfyUI 사용 (KAMPAI_ENV != production)
     - 프로덕션 모드: Replicate API 사용 (KAMPAI_ENV == production)
     """
-    data = request.json
-    
-    # 파라미터 추출
-    prompt = data.get("prompt", "").strip()
-    img_type = data.get("type", "custom")
-    width = data.get("width", 1024)
-    height = data.get("height", 1024)
-    selected_model = data.get("model")  # 사용자가 선택한 모델 (Pro/Business만)
-    input_image = data.get("input_image")  # 이미지 편집/레퍼런스용 (base64 또는 URL)
-    edit_mode = data.get("edit_mode", False)  # 이미지 편집 모드
-    reference_mode = data.get("reference_mode", False)  # 레퍼런스 모드 (옷 참조 등)
-    
-    if not prompt:
-        return jsonify({
-            "success": False,
-            "error": "프롬프트를 입력해주세요."
-        }), 400
-    
-    # 사용자 플랜 확인 (로그인한 경우)
-    user_plan = "free"
-    if hasattr(request, 'user') and request.user:
-        user_plan = request.user.get('plan', 'free')
-    
     try:
+        data = request.json or {}
+        
+        # 파라미터 추출
+        prompt = data.get("prompt", "").strip()
+        img_type = data.get("type", "custom")
+        width = data.get("width", 1024)
+        height = data.get("height", 1024)
+        selected_model = data.get("model")  # 사용자가 선택한 모델 (Pro/Business만)
+        input_image = data.get("input_image")  # 이미지 편집/레퍼런스용 (base64 또는 URL)
+        edit_mode = data.get("edit_mode", False)  # 이미지 편집 모드
+        reference_mode = data.get("reference_mode", False)  # 레퍼런스 모드 (옷 참조 등)
+        
+        if not prompt:
+            return jsonify({
+                "success": False,
+                "error": "프롬프트를 입력해주세요."
+            }), 400
+        
+        # 사용자 플랜 확인 (로그인한 경우)
+        user_plan = "free"
+        if hasattr(request, 'user') and request.user and isinstance(request.user, dict):
+            user_plan = request.user.get('plan', 'free') or 'free'
+        
         # Replicate API 토큰이 설정되어 있으면 Replicate 사용 (개발/프로덕션 모두)
         if replicate_client.is_configured():
             return generate_with_replicate_api(prompt, user_plan, width, height, selected_model, input_image, edit_mode, reference_mode)
@@ -526,7 +526,7 @@ def generate_image():
         traceback.print_exc()
         return jsonify({
             "success": False,
-            "error": str(e)
+            "error": f"서버 오류: {str(e)}"
         }), 500
 
 
