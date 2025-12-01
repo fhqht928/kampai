@@ -1477,10 +1477,10 @@
 
             <!-- 프롬프트 입력 -->
             <div class="section">
-                <div class="section-title">💬 프롬프트 (한글 OK!)</div>
+                <div class="section-title">💬 프롬프트</div>
                 <div class="prompt-input-container">
                     <textarea class="prompt-input" id="promptInput" placeholder="원하는 이미지를 한글로 설명하세요...&#10;&#10;예: 해질녘 바다 위의 등대, 파도가 치는 모습"></textarea>
-                    <div class="korean-badge">🇰🇷 한글 지원</div>
+                    <div class="korean-badge">🇰🇷 한글 자동 번역</div>
                 </div>
                 
                 <button class="optimize-btn" id="optimizeBtn">
@@ -2458,7 +2458,7 @@
                 return;
             }
             
-            // 한글이 포함되어 있으면 Ollama로 번역
+            // 한글이 포함되어 있으면 자동 번역
             let finalPrompt;
             if (containsKorean(prompt)) {
                 // 이미 최적화된 프롬프트가 있으면 사용
@@ -2466,37 +2466,14 @@
                     finalPrompt = state.optimizedPrompt;
                     console.log('✅ 기존 최적화 프롬프트 사용:', finalPrompt);
                 } else {
-                    // Ollama로 번역 시도
+                    // 한글 → 영어 자동 번역
                     generateBtn.disabled = true;
-                    generateBtn.innerHTML = '<div class="spinner"></div><span>AI 번역 중...</span>';
+                    generateBtn.innerHTML = '<div class="spinner"></div><span>한글 번역 중...</span>';
                     
-                    try {
-                        const response = await fetch(`${API_URL}/api/translate`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                text: prompt,
-                                style: state.style || ''
-                            })
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            finalPrompt = data.translated;
-                            if (state.selectedTags.length > 0) {
-                                finalPrompt += ', ' + state.selectedTags.join(', ');
-                            }
-                            console.log('🧠 Ollama 번역:', prompt, '→', finalPrompt);
-                        } else {
-                            throw new Error(data.error);
-                        }
-                    } catch (error) {
-                        console.warn('Ollama 실패, 폴백 사용:', error);
-                        finalPrompt = optimizeKoreanPrompt(prompt);
-                    }
+                    finalPrompt = optimizeKoreanPrompt(prompt);
+                    console.log('🇰🇷→🇺🇸 자동 번역:', prompt, '→', finalPrompt);
                     
-                    // 최적화된 프롬프트 UI에 표시
+                    // 번역된 프롬프트 UI에 표시
                     optimizedText.textContent = finalPrompt;
                     optimizedPromptEl.classList.add('active');
                 }
