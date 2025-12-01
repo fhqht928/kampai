@@ -182,9 +182,13 @@ class ReplicateClient:
             "output_format": "png"
         }
         
+        # aspect ratio 계산
+        aspect_ratio = self._get_aspect_ratio(width, height)
+        print(f"[Replicate] width={width}, height={height}, aspect_ratio={aspect_ratio}, model={model_key}")
+        
         # Qwen-Image 모델 파라미터
         if "qwen" in model_key:
-            input_params["aspect_ratio"] = self._get_aspect_ratio(width, height)
+            input_params["aspect_ratio"] = aspect_ratio
             input_params["image_size"] = "optimize_for_quality"
             input_params["go_fast"] = True
             if guidance_scale:
@@ -195,7 +199,7 @@ class ReplicateClient:
                 input_params["num_inference_steps"] = min(num_inference_steps, 50)
         # FLUX 2 Pro 파라미터 (특별 처리 - 이미지 편집/레퍼런스 지원)
         elif model_key == "flux-2-pro":
-            input_params["aspect_ratio"] = self._get_aspect_ratio(width, height)
+            input_params["aspect_ratio"] = aspect_ratio
             input_params["output_format"] = "png"
             input_params["safety_tolerance"] = 2  # 0-6, 높을수록 허용적
             if guidance_scale:
@@ -218,14 +222,14 @@ class ReplicateClient:
         # FLUX 1.x 모델 파라미터
         elif "flux" in model_key:
             input_params["num_outputs"] = num_outputs
-            input_params["aspect_ratio"] = self._get_aspect_ratio(width, height)
+            input_params["aspect_ratio"] = aspect_ratio
             if guidance_scale:
                 input_params["guidance"] = guidance_scale
             if seed is not None:
                 input_params["seed"] = seed
         # Ideogram 모델
         elif "ideogram" in model_key:
-            input_params["aspect_ratio"] = self._get_aspect_ratio(width, height)
+            input_params["aspect_ratio"] = aspect_ratio
             input_params["style_type"] = "Auto"
             input_params["magic_prompt_option"] = "Auto"
         else:
@@ -304,24 +308,41 @@ class ReplicateClient:
         }
         return versions.get(model_key, "")
     
-    def _get_aspect_ratio(self, width: int, height: int) -> str:
-        """너비/높이를 aspect ratio 문자열로 변환"""
+    def _get_aspect_ratio(self, width: int, height: int, model_key: str = "flux-schnell") -> str:
+        """
+        너비/높이를 aspect ratio 문자열로 변환
+        각 모델마다 지원하는 비율이 다름
+        
+        FLUX Schnell 지원: 1:1, 16:9, 9:16, 21:9, 9:21, 4:3, 3:4, 4:5, 5:4, 3:2, 2:3
+        Qwen-Image 지원: 1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3
+        """
         ratio = width / height
         
-        if ratio > 1.7:
-            return "21:9"
+        # 가로 비율 (width > height)
+        if ratio > 2.0:
+            return "21:9"  # 울트라와이드
+        elif ratio > 1.6:
+            return "16:9"  # 와이드스크린
         elif ratio > 1.4:
-            return "16:9"
+            return "3:2"   # 표준 가로
         elif ratio > 1.2:
-            return "4:3"
+            return "4:3"   # 클래식 가로
+        elif ratio > 1.1:
+            return "5:4"   # 거의 정사각
+        # 정사각형
         elif ratio > 0.9:
             return "1:1"
+        # 세로 비율 (height > width)
+        elif ratio > 0.8:
+            return "4:5"   # 거의 정사각
         elif ratio > 0.7:
-            return "3:4"
+            return "3:4"   # 클래식 세로
+        elif ratio > 0.6:
+            return "2:3"   # 표준 세로
         elif ratio > 0.5:
-            return "9:16"
+            return "9:16"  # 세로 와이드 (모바일)
         else:
-            return "9:21"
+            return "9:21"  # 울트라 세로
     
     def _wait_for_completion(self, prediction_id: str, timeout: int = 120) -> Dict:
         """Prediction 완료까지 대기"""
