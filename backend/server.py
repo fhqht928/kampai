@@ -132,62 +132,13 @@ def health_check():
 
 
 # ============================================
-# Argos Translate 한글 → 영어 번역 API (무제한 무료)
+# MyMemory 한글 → 영어 번역 API (무료)
 # ============================================
-
-# Argos Translate 초기화 (서버 시작 시 한 번만)
-argos_translator = None
-
-def init_argos_translate():
-    """Argos Translate 초기화 및 한국어→영어 모델 로드"""
-    global argos_translator
-    if argos_translator is not None:
-        return argos_translator
-    
-    try:
-        import argostranslate.package
-        import argostranslate.translate
-        
-        # 사용 가능한 패키지 업데이트
-        argostranslate.package.update_package_index()
-        available_packages = argostranslate.package.get_available_packages()
-        
-        # 한국어 → 영어 패키지 찾기
-        ko_en_package = next(
-            (pkg for pkg in available_packages 
-             if pkg.from_code == "ko" and pkg.to_code == "en"),
-            None
-        )
-        
-        if ko_en_package:
-            # 패키지 다운로드 및 설치 (이미 설치되어 있으면 스킵)
-            installed_packages = argostranslate.package.get_installed_packages()
-            is_installed = any(
-                pkg.from_code == "ko" and pkg.to_code == "en" 
-                for pkg in installed_packages
-            )
-            
-            if not is_installed:
-                print("📥 한국어→영어 번역 모델 다운로드 중...")
-                argostranslate.package.install_from_path(ko_en_package.download())
-                print("✅ 번역 모델 설치 완료!")
-            
-            # 번역기 로드
-            argos_translator = argostranslate.translate.get_translation_from_codes("ko", "en")
-            print("🌐 Argos Translate 초기화 완료 (한국어→영어)")
-            return argos_translator
-        else:
-            print("⚠️ 한국어→영어 번역 패키지를 찾을 수 없습니다")
-            return None
-    except Exception as e:
-        print(f"⚠️ Argos Translate 초기화 실패: {e}")
-        return None
-
 
 @app.route('/api/translate', methods=['POST'])
 def translate_prompt():
     """
-    한글 프롬프트를 Argos Translate로 영어로 번역 (무제한 무료)
+    한글 프롬프트를 MyMemory API로 영어로 번역 (하루 1000회 무료)
     """
     data = request.json
     korean_text = data.get("text", "").strip()
@@ -215,44 +166,24 @@ def translate_prompt():
     style_prefix = style_keywords.get(style.lower(), "") if style else ""
     
     try:
-        # Argos Translate로 번역
-        translator = init_argos_translate()
+        # MyMemory 무료 번역 API 사용
+        response = requests.get(
+            f"https://api.mymemory.translated.net/get",
+            params={
+                "q": korean_text,
+                "langpair": "ko|en"
+            },
+            timeout=10
+        )
         
-        if translator:
-            translated = translator.translate(korean_text)
-        else:
-            # 폴백: 개발 환경에서 Ollama 사용 시도
-            if not IS_PRODUCTION:
-                try:
-                    resp = requests.get(f"{OLLAMA_URL}/api/tags", timeout=2)
-                    if resp.status_code == 200:
-                        # Ollama 사용
-                        response = requests.post(
-                            f"{OLLAMA_URL}/api/generate",
-                            json={
-                                "model": "llama3.1:8b",
-                                "prompt": f"Translate to English (short, 15-30 words): {korean_text}",
-                                "stream": False,
-                                "options": {"temperature": 0.7, "num_predict": 100}
-                            },
-                            timeout=30
-                        )
-                        if response.status_code == 200:
-                            translated = response.json().get("response", "").strip().strip('"\'')
-                        else:
-                            raise Exception("Ollama failed")
-                    else:
-                        raise Exception("Ollama not available")
-                except:
-                    return jsonify({
-                        "success": False,
-                        "error": "번역 서비스를 사용할 수 없습니다."
-                    }), 503
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("responseStatus") == 200:
+                translated = data["responseData"]["translatedText"]
             else:
-                return jsonify({
-                    "success": False,
-                    "error": "번역 서비스를 사용할 수 없습니다."
-                }), 503
+                raise Exception("MyMemory API error")
+        else:
+            raise Exception(f"API error: {response.status_code}")
         
         # 불필요한 문자 정리
         translated = translated.strip('"\'')
@@ -267,11 +198,42 @@ def translate_prompt():
             "success": True,
             "original": korean_text,
             "translated": translated,
-            "model": "argos-translate",
+            "model": "mymemory",
             "style_applied": style if style else "none"
         })
             
     except Exception as e:
+        # 폴백: 개발 환경에서 Ollama 사용 시도
+        if not IS_PRODUCTION:
+            try:
+                resp = requests.get(f"{OLLAMA_URL}/api/tags", timeout=2)
+                if resp.status_code == 200:
+                    response = requests.post(
+                        f"{OLLAMA_URL}/api/generate",
+                        json={
+                            "model": "llama3.1:8b",
+                            "prompt": f"Translate to English (short, 15-30 words): {korean_text}",
+                            "stream": False,
+                            "options": {"temperature": 0.7, "num_predict": 100}
+                        },
+                        timeout=30
+                    )
+                    if response.status_code == 200:
+                        translated = response.json().get("response", "").strip().strip('"\'')
+                        if style_prefix:
+                            translated = f"{style_prefix}, {translated}, masterpiece, best quality"
+                        else:
+                            translated = f"{translated}, high quality, detailed"
+                        return jsonify({
+                            "success": True,
+                            "original": korean_text,
+                            "translated": translated,
+                            "model": "ollama",
+                            "style_applied": style if style else "none"
+                        })
+            except:
+                pass
+        
         return jsonify({
             "success": False,
             "error": f"번역 오류: {str(e)}"
