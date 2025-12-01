@@ -1097,6 +1097,8 @@ if __name__ == '__main__':
         # 클라우드 환경: 바로 시작
         print("🍺 Kampai 서버 시작 (Production)")
         print(f"   Port: {port}")
+        print(f"   REPLICATE_API_TOKEN: {'✅ 설정됨' if replicate_client.is_configured() else '❌ 미설정'}")
+        print(f"   JWT_SECRET: {'✅ 설정됨' if os.environ.get('JWT_SECRET') else '⚠️ 자동생성'}")
         app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
     else:
         # 로컬 환경: 기존 로직
