@@ -56,18 +56,21 @@ from payment import (
     get_payment_history, handle_webhook, TOSS_CLIENT_KEY
 )
 
-# 웹사이트 폴더 경로
-WEBSITE_FOLDER = Path(__file__).parent.parent / "website"
+# 웹사이트 폴더 경로 (프로덕션: website-prod, 개발: website-dev)
+if IS_PRODUCTION:
+    WEBSITE_FOLDER = Path(__file__).parent.parent / "website-prod"
+else:
+    WEBSITE_FOLDER = Path(__file__).parent.parent / "website-dev"
 
 app = Flask(__name__, static_folder=str(WEBSITE_FOLDER), static_url_path='')
-CORS(app)  # 웹사이트에서 API 호출 허용
+CORS(app, origins=["*"])  # 웹사이트에서 API 호출 허용
 
-# 설정
-UPLOAD_FOLDER = Path("D:/AI_Work/uploads")
-OUTPUT_FOLDER = Path("D:/AI_Work/outputs")
-COMFYUI_OUTPUT = Path("D:/AI_Tools/ComfyUI/output")
-ORDERS_FILE = Path("D:/AI_Work/orders.json")
-OLLAMA_URL = "http://localhost:11434"  # Ollama 기본 주소
+# 설정 (프로덕션 환경에서는 환경변수 사용)
+UPLOAD_FOLDER = Path(os.environ.get("UPLOAD_FOLDER", "D:/AI_Work/uploads"))
+OUTPUT_FOLDER = Path(os.environ.get("OUTPUT_FOLDER", "D:/AI_Work/outputs"))
+COMFYUI_OUTPUT = Path(os.environ.get("COMFYUI_OUTPUT", "D:/AI_Tools/ComfyUI/output"))
+ORDERS_FILE = Path(os.environ.get("ORDERS_FILE", "D:/AI_Work/orders.json"))
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -1115,11 +1118,14 @@ if __name__ == '__main__':
     print(f"서버 시작: http://localhost:5000")
     print("=" * 50)
     
+    # 포트 설정 (Railway 등 클라우드 환경에서는 PORT 환경변수 사용)
+    port = int(os.environ.get("PORT", 5000))
+    
     # 선택한 모드로 서버 실행
     if is_debug:
         # 개발 모드: debug=True, 자동 리로드 활성화
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        app.run(host='0.0.0.0', port=port, debug=True)
     else:
         # 프로덕션 모드: debug=False, threaded=True
         print("⚠️  프로덕션 환경에서는 gunicorn/waitress 사용을 권장합니다")
-        app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
+        app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
