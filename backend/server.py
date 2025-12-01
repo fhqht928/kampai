@@ -49,7 +49,11 @@ from replicate_api import (
 from auth import (
     register_user, login_user, token_required, optional_token,
     get_user_usage, check_can_generate, increment_usage,
-    get_subscription_status, PLANS, cancel_subscription
+    get_subscription_status, PLANS, cancel_subscription,
+    admin_required, get_admin_stats, get_all_users, admin_update_user,
+    get_all_payments, get_generation_logs, create_announcement,
+    get_announcements, update_announcement, delete_announcement,
+    get_admin_logs_list, set_admin, log_admin_action
 )
 from payment import (
     create_payment_order, confirm_payment, cancel_payment,
@@ -1084,6 +1088,151 @@ def api_check_generate():
     """생성 가능 여부 확인"""
     result = check_can_generate(request.user['id'])
     return jsonify(result)
+
+
+# ============================================
+# 관리자 API
+# ============================================
+
+@app.route('/api/admin/stats', methods=['GET'])
+@admin_required
+def api_admin_stats():
+    """관리자 대시보드 통계"""
+    stats = get_admin_stats()
+    return jsonify({"success": True, "stats": stats})
+
+
+@app.route('/api/admin/users', methods=['GET'])
+@admin_required
+def api_admin_users():
+    """사용자 목록 조회"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    search = request.args.get('search', None)
+    plan_filter = request.args.get('plan', None)
+    
+    result = get_all_users(page, per_page, search, plan_filter)
+    return jsonify({"success": True, **result})
+
+
+@app.route('/api/admin/users/<int:user_id>', methods=['PUT'])
+@admin_required
+def api_admin_update_user(user_id):
+    """사용자 정보 수정"""
+    updates = request.json
+    result = admin_update_user(request.user['id'], user_id, updates)
+    status_code = 200 if result['success'] else 400
+    return jsonify(result), status_code
+
+
+@app.route('/api/admin/users/<int:user_id>/plan', methods=['PUT'])
+@admin_required
+def api_admin_change_plan(user_id):
+    """사용자 플랜 변경"""
+    data = request.json
+    plan = data.get('plan')
+    
+    if not plan or plan not in PLANS:
+        return jsonify({"success": False, "error": "유효하지 않은 플랜입니다"}), 400
+    
+    result = admin_update_user(request.user['id'], user_id, {"plan": plan})
+    return jsonify(result)
+
+
+@app.route('/api/admin/payments', methods=['GET'])
+@admin_required
+def api_admin_payments():
+    """결제 내역 조회"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    status_filter = request.args.get('status', None)
+    
+    result = get_all_payments(page, per_page, status_filter)
+    return jsonify({"success": True, **result})
+
+
+@app.route('/api/admin/generations', methods=['GET'])
+@admin_required
+def api_admin_generations():
+    """생성 로그 조회"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 50, type=int)
+    user_id = request.args.get('user_id', None, type=int)
+    
+    result = get_generation_logs(page, per_page, user_id)
+    return jsonify({"success": True, **result})
+
+
+@app.route('/api/admin/announcements', methods=['GET'])
+@admin_required
+def api_admin_get_announcements():
+    """공지사항 목록 (관리자용)"""
+    announcements = get_announcements(active_only=False)
+    return jsonify({"success": True, "announcements": announcements})
+
+
+@app.route('/api/admin/announcements', methods=['POST'])
+@admin_required
+def api_admin_create_announcement():
+    """공지사항 생성"""
+    data = request.json
+    title = data.get('title')
+    content = data.get('content')
+    type_ = data.get('type', 'info')
+    expires_at = data.get('expires_at')
+    
+    if not title or not content:
+        return jsonify({"success": False, "error": "제목과 내용은 필수입니다"}), 400
+    
+    result = create_announcement(request.user['id'], title, content, type_, expires_at)
+    return jsonify(result)
+
+
+@app.route('/api/admin/announcements/<int:announcement_id>', methods=['PUT'])
+@admin_required
+def api_admin_update_announcement(announcement_id):
+    """공지사항 수정"""
+    updates = request.json
+    result = update_announcement(request.user['id'], announcement_id, updates)
+    return jsonify(result)
+
+
+@app.route('/api/admin/announcements/<int:announcement_id>', methods=['DELETE'])
+@admin_required
+def api_admin_delete_announcement(announcement_id):
+    """공지사항 삭제"""
+    result = delete_announcement(request.user['id'], announcement_id)
+    return jsonify(result)
+
+
+@app.route('/api/admin/logs', methods=['GET'])
+@admin_required
+def api_admin_logs():
+    """관리자 활동 로그 조회"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 50, type=int)
+    
+    result = get_admin_logs_list(page, per_page)
+    return jsonify({"success": True, **result})
+
+
+@app.route('/api/admin/check', methods=['GET'])
+@admin_required
+def api_admin_check():
+    """관리자 권한 확인"""
+    return jsonify({
+        "success": True,
+        "is_admin": True,
+        "user": request.user
+    })
+
+
+# 공개 API - 활성 공지사항 조회
+@app.route('/api/announcements', methods=['GET'])
+def api_public_announcements():
+    """활성 공지사항 목록 (사용자용)"""
+    announcements = get_announcements(active_only=True)
+    return jsonify({"success": True, "announcements": announcements})
 
 
 # ============================================

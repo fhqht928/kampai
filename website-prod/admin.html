@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kampai Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text-color: #eee;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0f0f23 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px 0;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar .logo h3 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+        
+        .sidebar .logo small {
+            color: #888;
+        }
+        
+        .sidebar .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #aaa;
+        }
+        
+        .sidebar .nav-item:hover,
+        .sidebar .nav-item.active {
+            background: rgba(108, 92, 231, 0.2);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .sidebar .nav-item i {
+            font-size: 1.2rem;
+            width: 24px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .stat-card .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .stat-card .stat-label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+        }
+        
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 20px;
+        }
+        
+        .table {
+            color: var(--text-color);
+        }
+        
+        .table thead th {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #888;
+            font-weight: 500;
+        }
+        
+        .table td {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            vertical-align: middle;
+        }
+        
+        .badge-plan {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        
+        .badge-free { background: #636e72; }
+        .badge-basic { background: #00b894; }
+        .badge-pro { background: #6c5ce7; }
+        .badge-business { background: #e17055; }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary-color);
+        }
+        
+        .form-control, .form-select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-color);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--primary-color);
+            color: var(--text-color);
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .user-actions .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        
+        #loginPage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .login-box {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .announcement-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        
+        .type-info { background: #0984e3; }
+        .type-warning { background: #fdcb6e; color: #333; }
+        .type-error { background: #d63031; }
+        .type-success { background: #00b894; }
+        
+        .log-prompt {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .pagination .page-link {
+            background: var(--card-bg);
+            border-color: rgba(255,255,255,0.1);
+            color: var(--text-color);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- 로그인 페이지 -->
+    <div id="loginPage" style="display: none;">
+        <div class="login-box">
+            <h3 class="text-center mb-4">🍺 Kampai Admin</h3>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label">이메일</label>
+                    <input type="email" class="form-control" id="loginEmail" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-control" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">로그인</button>
+            </form>
+            <div id="loginError" class="text-danger mt-3 text-center" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <!-- 관리자 대시보드 -->
+    <div id="adminDashboard" style="display: none;">
+        <!-- 사이드바 -->
+        <div class="sidebar">
+            <div class="logo">
+                <h3>🍺 Kampai</h3>
+                <small>Admin Dashboard</small>
+            </div>
+            <div class="nav-item active" data-section="dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>대시보드</span>
+            </div>
+            <div class="nav-item" data-section="users">
+                <i class="bi bi-people"></i>
+                <span>사용자 관리</span>
+            </div>
+            <div class="nav-item" data-section="payments">
+                <i class="bi bi-credit-card"></i>
+                <span>결제 내역</span>
+            </div>
+            <div class="nav-item" data-section="generations">
+                <i class="bi bi-image"></i>
+                <span>생성 로그</span>
+            </div>
+            <div class="nav-item" data-section="announcements">
+                <i class="bi bi-megaphone"></i>
+                <span>공지사항</span>
+            </div>
+            <div class="nav-item" data-section="logs">
+                <i class="bi bi-journal-text"></i>
+                <span>활동 로그</span>
+            </div>
+            <div class="nav-item" onclick="logout()" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <i class="bi bi-box-arrow-left"></i>
+                <span>로그아웃</span>
+            </div>
+        </div>
+        
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 대시보드 섹션 -->
+            <div id="section-dashboard" class="section active">
+                <h4 class="page-title">📊 대시보드</h4>
+                
+                <!-- 통계 카드 -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="stat-value" id="stat-totalUsers">-</div>
+                                    <div class="stat-label">총 사용자</div>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(0,184,148,0.2); color: #00b894;">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="stat-value" id="stat-todaySignups">-</div>
+                                    <div class="stat-label">오늘 가입</div>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(108,92,231,0.2); color: #6c5ce7;">
+                                    <i class="bi bi-person-plus"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="stat-value" id="stat-todayGenerations">-</div>
+                                    <div class="stat-label">오늘 생성</div>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(225,112,85,0.2); color: #e17055;">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="stat-value" id="stat-monthRevenue">-</div>
+                                    <div class="stat-label">이번 달 매출</div>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(253,203,110,0.2); color: #fdcb6e;">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 추가 통계 -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">플랜별 사용자</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="planDistribution">
+                                    <div class="loading">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">전체 통계</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span>총 생성량</span>
+                                    <strong id="stat-totalGenerations">-</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span>총 매출</span>
+                                    <strong id="stat-totalRevenue">-</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span>이번 달 가입</span>
+                                    <strong id="stat-monthSignups">-</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>최근 7일 활성 사용자</span>
+                                    <strong id="stat-activeUsers">-</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 사용자 관리 섹션 -->
+            <div id="section-users" class="section">
+                <h4 class="page-title">👥 사용자 관리</h4>
+                
+                <!-- 검색 & 필터 -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="userSearch" placeholder="이메일 또는 이름 검색...">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="userPlanFilter">
+                                    <option value="">모든 플랜</option>
+                                    <option value="free">Free</option>
+                                    <option value="basic">Basic</option>
+                                    <option value="pro">Pro</option>
+                                    <option value="business">Business</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" onclick="loadUsers()">
+                                    <i class="bi bi-search"></i> 검색
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 사용자 테이블 -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>이메일</th>
+                                        <th>이름</th>
+                                        <th>플랜</th>
+                                        <th>상태</th>
+                                        <th>가입일</th>
+                                        <th>마지막 로그인</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="usersPagination" class="d-flex justify-content-center mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 결제 내역 섹션 -->
+            <div id="section-payments" class="section">
+                <h4 class="page-title">💳 결제 내역</h4>
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <select class="form-select" id="paymentStatusFilter">
+                                    <option value="">모든 상태</option>
+                                    <option value="pending">대기</option>
+                                    <option value="approved">승인</option>
+                                    <option value="cancelled">취소</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" onclick="loadPayments()">
+                                    <i class="bi bi-search"></i> 검색
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>주문번호</th>
+                                        <th>사용자</th>
+                                        <th>플랜</th>
+                                        <th>금액</th>
+                                        <th>상태</th>
+                                        <th>결제일</th>
+                                        <th>승인일</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentsTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="paymentsPagination" class="d-flex justify-content-center mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 생성 로그 섹션 -->
+            <div id="section-generations" class="section">
+                <h4 class="page-title">🖼️ 생성 로그</h4>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>사용자</th>
+                                        <th>프롬프트</th>
+                                        <th>스타일</th>
+                                        <th>생성일</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="generationsTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="generationsPagination" class="d-flex justify-content-center mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 공지사항 섹션 -->
+            <div id="section-announcements" class="section">
+                <h4 class="page-title">📢 공지사항</h4>
+                
+                <div class="mb-4">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#announcementModal" onclick="openAnnouncementModal()">
+                        <i class="bi bi-plus-lg"></i> 새 공지사항
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>제목</th>
+                                        <th>유형</th>
+                                        <th>상태</th>
+                                        <th>등록일</th>
+                                        <th>만료일</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="announcementsTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 활동 로그 섹션 -->
+            <div id="section-logs" class="section">
+                <h4 class="page-title">📋 관리자 활동 로그</h4>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>관리자</th>
+                                        <th>작업</th>
+                                        <th>대상</th>
+                                        <th>상세</th>
+                                        <th>일시</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logsTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="logsPagination" class="d-flex justify-content-center mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 사용자 편집 모달 -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">사용자 편집</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label class="form-label">이메일</label>
+                        <input type="email" class="form-control" id="editUserEmail" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">이름</label>
+                        <input type="text" class="form-control" id="editUserName">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">플랜</label>
+                        <select class="form-select" id="editUserPlan">
+                            <option value="free">Free</option>
+                            <option value="basic">Basic</option>
+                            <option value="pro">Pro</option>
+                            <option value="business">Business</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editUserActive">
+                            <label class="form-check-label">계정 활성화</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editUserAdmin">
+                            <label class="form-check-label">관리자 권한</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 공지사항 모달 -->
+    <div class="modal fade" id="announcementModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="announcementModalTitle">새 공지사항</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editAnnouncementId">
+                    <div class="mb-3">
+                        <label class="form-label">제목</label>
+                        <input type="text" class="form-control" id="announcementTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">내용</label>
+                        <textarea class="form-control" id="announcementContent" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">유형</label>
+                        <select class="form-select" id="announcementType">
+                            <option value="info">정보</option>
+                            <option value="warning">경고</option>
+                            <option value="success">성공</option>
+                            <option value="error">오류</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">만료일 (선택)</label>
+                        <input type="datetime-local" class="form-control" id="announcementExpires">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="announcementActive" checked>
+                            <label class="form-check-label">활성화</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAnnouncement()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API 베이스 URL
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000' 
+            : 'https://kampai-production.up.railway.app';
+        
+        let token = localStorage.getItem('adminToken');
+        let currentUsersPage = 1;
+        let currentPaymentsPage = 1;
+        let currentGenerationsPage = 1;
+        let currentLogsPage = 1;
+        
+        // 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            setupNavigation();
+            setupLoginForm();
+        });
+        
+        // 인증 확인
+        async function checkAuth() {
+            if (!token) {
+                showLoginPage();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/check`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    showDashboard();
+                    loadDashboardData();
+                } else {
+                    localStorage.removeItem('adminToken');
+                    showLoginPage();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                showLoginPage();
+            }
+        }
+        
+        function showLoginPage() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('adminDashboard').style.display = 'none';
+        }
+        
+        function showDashboard() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+        }
+        
+        // 로그인 폼
+        function setupLoginForm() {
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                try {
+                    const response = await fetch(`${API_BASE}/api/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        token = data.token;
+                        localStorage.setItem('adminToken', token);
+                        
+                        // 관리자 권한 확인
+                        const adminCheck = await fetch(`${API_BASE}/api/admin/check`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        
+                        if (adminCheck.ok) {
+                            showDashboard();
+                            loadDashboardData();
+                        } else {
+                            document.getElementById('loginError').textContent = '관리자 권한이 없습니다';
+                            document.getElementById('loginError').style.display = 'block';
+                            localStorage.removeItem('adminToken');
+                        }
+                    } else {
+                        document.getElementById('loginError').textContent = data.error || '로그인 실패';
+                        document.getElementById('loginError').style.display = 'block';
+                    }
+                } catch (error) {
+                    document.getElementById('loginError').textContent = '서버 연결 오류';
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            });
+        }
+        
+        // 네비게이션 설정
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+                item.addEventListener('click', () => {
+                    const section = item.dataset.section;
+                    
+                    // 활성 상태 업데이트
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // 섹션 표시
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    document.getElementById(`section-${section}`).classList.add('active');
+                    
+                    // 데이터 로드
+                    switch(section) {
+                        case 'dashboard': loadDashboardData(); break;
+                        case 'users': loadUsers(); break;
+                        case 'payments': loadPayments(); break;
+                        case 'generations': loadGenerations(); break;
+                        case 'announcements': loadAnnouncements(); break;
+                        case 'logs': loadLogs(); break;
+                    }
+                });
+            });
+        }
+        
+        // 로그아웃
+        function logout() {
+            localStorage.removeItem('adminToken');
+            token = null;
+            showLoginPage();
+        }
+        
+        // API 요청 헬퍼
+        async function apiRequest(endpoint, options = {}) {
+            const response = await fetch(`${API_BASE}${endpoint}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    ...options.headers
+                }
+            });
+            return response.json();
+        }
+        
+        // 대시보드 데이터 로드
+        async function loadDashboardData() {
+            try {
+                const data = await apiRequest('/api/admin/stats');
+                if (data.success) {
+                    const stats = data.stats;
+                    
+                    document.getElementById('stat-totalUsers').textContent = stats.total_users.toLocaleString();
+                    document.getElementById('stat-todaySignups').textContent = stats.today_signups.toLocaleString();
+                    document.getElementById('stat-todayGenerations').textContent = stats.today_generations.toLocaleString();
+                    document.getElementById('stat-monthRevenue').textContent = '₩' + stats.month_revenue.toLocaleString();
+                    document.getElementById('stat-totalGenerations').textContent = stats.total_generations.toLocaleString();
+                    document.getElementById('stat-totalRevenue').textContent = '₩' + stats.total_revenue.toLocaleString();
+                    document.getElementById('stat-monthSignups').textContent = stats.month_signups.toLocaleString();
+                    document.getElementById('stat-activeUsers').textContent = stats.active_users_7d.toLocaleString();
+                    
+                    // 플랜 분포
+                    const planHtml = Object.entries(stats.users_by_plan || {}).map(([plan, count]) => `
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="badge badge-plan badge-${plan}">${plan.toUpperCase()}</span>
+                            <span>${count}명</span>
+                        </div>
+                    `).join('');
+                    document.getElementById('planDistribution').innerHTML = planHtml || '<p class="text-muted">데이터 없음</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+            }
+        }
+        
+        // 사용자 목록 로드
+        async function loadUsers(page = 1) {
+            currentUsersPage = page;
+            const search = document.getElementById('userSearch').value;
+            const plan = document.getElementById('userPlanFilter').value;
+            
+            let url = `/api/admin/users?page=${page}&per_page=20`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (plan) url += `&plan=${plan}`;
+            
+            try {
+                const data = await apiRequest(url);
+                if (data.success) {
+                    const tbody = document.getElementById('usersTableBody');
+                    tbody.innerHTML = data.users.map(user => `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.email}</td>
+                            <td>${user.name || '-'}</td>
+                            <td><span class="badge badge-plan badge-${user.plan}">${user.plan.toUpperCase()}</span></td>
+                            <td>
+                                <span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">
+                                    ${user.is_active ? '활성' : '비활성'}
+                                </span>
+                                ${user.is_admin ? '<span class="badge bg-warning ms-1">관리자</span>' : ''}
+                            </td>
+                            <td>${formatDate(user.created_at)}</td>
+                            <td>${formatDate(user.last_login)}</td>
+                            <td class="user-actions">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editUser(${user.id}, '${user.email}', '${user.name || ''}', '${user.plan}', ${user.is_active}, ${user.is_admin})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    
+                    renderPagination('usersPagination', data.page, data.total_pages, loadUsers);
+                }
+            } catch (error) {
+                console.error('Failed to load users:', error);
+            }
+        }
+        
+        // 사용자 편집
+        function editUser(id, email, name, plan, isActive, isAdmin) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUserEmail').value = email;
+            document.getElementById('editUserName').value = name;
+            document.getElementById('editUserPlan').value = plan;
+            document.getElementById('editUserActive').checked = isActive;
+            document.getElementById('editUserAdmin').checked = isAdmin;
+            
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+        }
+        
+        // 사용자 저장
+        async function saveUser() {
+            const userId = document.getElementById('editUserId').value;
+            const updates = {
+                name: document.getElementById('editUserName').value,
+                plan: document.getElementById('editUserPlan').value,
+                is_active: document.getElementById('editUserActive').checked,
+                is_admin: document.getElementById('editUserAdmin').checked
+            };
+            
+            try {
+                const data = await apiRequest(`/api/admin/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(updates)
+                });
+                
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                    loadUsers(currentUsersPage);
+                    alert('저장되었습니다');
+                } else {
+                    alert(data.error || '저장 실패');
+                }
+            } catch (error) {
+                alert('서버 오류');
+            }
+        }
+        
+        // 결제 내역 로드
+        async function loadPayments(page = 1) {
+            currentPaymentsPage = page;
+            const status = document.getElementById('paymentStatusFilter').value;
+            
+            let url = `/api/admin/payments?page=${page}&per_page=20`;
+            if (status) url += `&status=${status}`;
+            
+            try {
+                const data = await apiRequest(url);
+                if (data.success) {
+                    const tbody = document.getElementById('paymentsTableBody');
+                    tbody.innerHTML = data.payments.map(payment => `
+                        <tr>
+                            <td>${payment.order_id}</td>
+                            <td>${payment.user_email}<br><small class="text-muted">${payment.user_name || ''}</small></td>
+                            <td><span class="badge badge-plan badge-${payment.plan}">${payment.plan.toUpperCase()}</span></td>
+                            <td>₩${payment.amount.toLocaleString()}</td>
+                            <td>
+                                <span class="badge ${payment.status === 'approved' ? 'bg-success' : payment.status === 'cancelled' ? 'bg-danger' : 'bg-warning'}">
+                                    ${payment.status}
+                                </span>
+                            </td>
+                            <td>${formatDate(payment.created_at)}</td>
+                            <td>${formatDate(payment.approved_at)}</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="7" class="text-center">데이터 없음</td></tr>';
+                    
+                    renderPagination('paymentsPagination', data.page, data.total_pages, loadPayments);
+                }
+            } catch (error) {
+                console.error('Failed to load payments:', error);
+            }
+        }
+        
+        // 생성 로그 로드
+        async function loadGenerations(page = 1) {
+            currentGenerationsPage = page;
+            
+            try {
+                const data = await apiRequest(`/api/admin/generations?page=${page}&per_page=50`);
+                if (data.success) {
+                    const tbody = document.getElementById('generationsTableBody');
+                    tbody.innerHTML = data.logs.map(log => `
+                        <tr>
+                            <td>${log.id}</td>
+                            <td>${log.user_email}</td>
+                            <td class="log-prompt" title="${escapeHtml(log.prompt || '')}">${escapeHtml(log.prompt || '-')}</td>
+                            <td>${log.style || '-'}</td>
+                            <td>${formatDate(log.created_at)}</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="5" class="text-center">데이터 없음</td></tr>';
+                    
+                    renderPagination('generationsPagination', data.page, data.total_pages, loadGenerations);
+                }
+            } catch (error) {
+                console.error('Failed to load generations:', error);
+            }
+        }
+        
+        // 공지사항 로드
+        async function loadAnnouncements() {
+            try {
+                const data = await apiRequest('/api/admin/announcements');
+                if (data.success) {
+                    const tbody = document.getElementById('announcementsTableBody');
+                    tbody.innerHTML = data.announcements.map(a => `
+                        <tr>
+                            <td>${a.id}</td>
+                            <td>${escapeHtml(a.title)}</td>
+                            <td><span class="announcement-type type-${a.type}">${a.type}</span></td>
+                            <td>
+                                <span class="badge ${a.is_active ? 'bg-success' : 'bg-secondary'}">
+                                    ${a.is_active ? '활성' : '비활성'}
+                                </span>
+                            </td>
+                            <td>${formatDate(a.created_at)}</td>
+                            <td>${formatDate(a.expires_at)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick='editAnnouncement(${JSON.stringify(a)})'>
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteAnnouncement(${a.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="7" class="text-center">공지사항 없음</td></tr>';
+                }
+            } catch (error) {
+                console.error('Failed to load announcements:', error);
+            }
+        }
+        
+        // 공지사항 모달 열기
+        function openAnnouncementModal() {
+            document.getElementById('editAnnouncementId').value = '';
+            document.getElementById('announcementTitle').value = '';
+            document.getElementById('announcementContent').value = '';
+            document.getElementById('announcementType').value = 'info';
+            document.getElementById('announcementExpires').value = '';
+            document.getElementById('announcementActive').checked = true;
+            document.getElementById('announcementModalTitle').textContent = '새 공지사항';
+        }
+        
+        // 공지사항 편집
+        function editAnnouncement(announcement) {
+            document.getElementById('editAnnouncementId').value = announcement.id;
+            document.getElementById('announcementTitle').value = announcement.title;
+            document.getElementById('announcementContent').value = announcement.content;
+            document.getElementById('announcementType').value = announcement.type;
+            document.getElementById('announcementExpires').value = announcement.expires_at ? announcement.expires_at.slice(0, 16) : '';
+            document.getElementById('announcementActive').checked = announcement.is_active;
+            document.getElementById('announcementModalTitle').textContent = '공지사항 편집';
+            
+            new bootstrap.Modal(document.getElementById('announcementModal')).show();
+        }
+        
+        // 공지사항 저장
+        async function saveAnnouncement() {
+            const id = document.getElementById('editAnnouncementId').value;
+            const data = {
+                title: document.getElementById('announcementTitle').value,
+                content: document.getElementById('announcementContent').value,
+                type: document.getElementById('announcementType').value,
+                expires_at: document.getElementById('announcementExpires').value || null,
+                is_active: document.getElementById('announcementActive').checked
+            };
+            
+            try {
+                let result;
+                if (id) {
+                    result = await apiRequest(`/api/admin/announcements/${id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    result = await apiRequest('/api/admin/announcements', {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                }
+                
+                if (result.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('announcementModal')).hide();
+                    loadAnnouncements();
+                    alert('저장되었습니다');
+                } else {
+                    alert(result.error || '저장 실패');
+                }
+            } catch (error) {
+                alert('서버 오류');
+            }
+        }
+        
+        // 공지사항 삭제
+        async function deleteAnnouncement(id) {
+            if (!confirm('정말 삭제하시겠습니까?')) return;
+            
+            try {
+                const result = await apiRequest(`/api/admin/announcements/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (result.success) {
+                    loadAnnouncements();
+                } else {
+                    alert(result.error || '삭제 실패');
+                }
+            } catch (error) {
+                alert('서버 오류');
+            }
+        }
+        
+        // 활동 로그 로드
+        async function loadLogs(page = 1) {
+            currentLogsPage = page;
+            
+            try {
+                const data = await apiRequest(`/api/admin/logs?page=${page}&per_page=50`);
+                if (data.success) {
+                    const tbody = document.getElementById('logsTableBody');
+                    tbody.innerHTML = data.logs.map(log => `
+                        <tr>
+                            <td>${log.id}</td>
+                            <td>${log.admin_email}</td>
+                            <td>${log.action}</td>
+                            <td>${log.target_type || '-'} ${log.target_id ? '#' + log.target_id : ''}</td>
+                            <td class="log-prompt" title="${escapeHtml(log.details || '')}">${escapeHtml(log.details || '-')}</td>
+                            <td>${formatDate(log.created_at)}</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="6" class="text-center">로그 없음</td></tr>';
+                    
+                    renderPagination('logsPagination', data.page, data.total_pages, loadLogs);
+                }
+            } catch (error) {
+                console.error('Failed to load logs:', error);
+            }
+        }
+        
+        // 페이지네이션 렌더링
+        function renderPagination(containerId, currentPage, totalPages, loadFunction) {
+            const container = document.getElementById(containerId);
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '<nav><ul class="pagination">';
+            
+            // 이전
+            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="event.preventDefault(); ${currentPage > 1 ? loadFunction.name + '(' + (currentPage - 1) + ')' : ''}">이전</a>
+            </li>`;
+            
+            // 페이지 번호
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); ${loadFunction.name}(${i})">${i}</a>
+                </li>`;
+            }
+            
+            // 다음
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="event.preventDefault(); ${currentPage < totalPages ? loadFunction.name + '(' + (currentPage + 1) + ')' : ''}">다음</a>
+            </li>`;
+            
+            html += '</ul></nav>';
+            container.innerHTML = html;
+        }
+        
+        // 유틸리티 함수
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleString('ko-KR');
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
