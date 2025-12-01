@@ -1081,63 +1081,49 @@ def select_server_mode():
                 return "production"
             else:
                 print("  ⚠️ 1 또는 2를 입력하세요")
-        except EOFError:
+        except (EOFError, OSError):
             # 입력이 불가능한 환경 (Railway 등)에서는 production으로
             return "production"
 
 
 if __name__ == '__main__':
-    print("=" * 50)
-    print("🍺 Kampai 백엔드 서버")
-    print("=" * 50)
-    
-    # 서버 모드 선택
-    server_mode = select_server_mode()
-    is_debug = (server_mode == "development")
-    
-    print("")
-    print(f"🖥️ 서버 모드: {'개발 (Development)' if is_debug else '프로덕션 (Production)'}")
-    
-    # 이미지 생성 엔진 상태 표시
-    print("")
-    print("🖼️ 이미지 생성 엔진:")
-    if replicate_client.is_configured():
-        print("  ✅ Replicate API 활성화 - 실제 AI 모델 사용 중")
-        print("     - FLUX Schnell (Free/Basic)")
-        print("     - Qwen-Image, FLUX 2 Pro, FLUX Pro Ultra (Pro/Business)")
-    else:
-        print("  ⚠️ ComfyUI 폴백 모드 - Replicate 토큰 미설정")
-        print("     Replicate 사용하려면: $env:REPLICATE_API_TOKEN='your_token'")
-    
-    print("")
-    print(f"📁 업로드 폴더: {UPLOAD_FOLDER}")
-    print(f"📁 출력 폴더: {OUTPUT_FOLDER}")
-    print("")
-    
-    print("💰 플랜 구조:")
-    for plan_id, plan_info in PLANS.items():
-        price = plan_info['price']
-        limit = plan_info['daily_limit']
-        model = plan_info.get('model_name', plan_info.get('model', 'N/A'))
-        print(f"  {plan_id.upper():10} ₩{price:,}/월  |  {limit}장/일  |  {model}")
-    print("")
-    print("API 엔드포인트:")
-    print("  POST /api/generate         - 이미지 생성")
-    print("  GET  /api/generate/status  - 서비스 상태")
-    print("  POST /api/auth/register    - 회원가입")
-    print("  POST /api/auth/login       - 로그인")
-    print("")
-    print(f"서버 시작: http://localhost:5000")
-    print("=" * 50)
-    
     # 포트 설정 (Railway 등 클라우드 환경에서는 PORT 환경변수 사용)
     port = int(os.environ.get("PORT", 5000))
     
-    # 선택한 모드로 서버 실행
-    if is_debug:
-        # 개발 모드: debug=True, 자동 리로드 활성화
-        app.run(host='0.0.0.0', port=port, debug=True)
-    else:
-        # 프로덕션 모드: debug=False, threaded=True
-        print("⚠️  프로덕션 환경에서는 gunicorn/waitress 사용을 권장합니다")
+    # 환경 확인 - RAILWAY_ENVIRONMENT가 있으면 클라우드 환경
+    is_cloud = os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("PORT")
+    
+    if is_cloud:
+        # 클라우드 환경: 바로 시작
+        print("🍺 Kampai 서버 시작 (Production)")
+        print(f"   Port: {port}")
         app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
+    else:
+        # 로컬 환경: 기존 로직
+        print("=" * 50)
+        print("🍺 Kampai 백엔드 서버")
+        print("=" * 50)
+        
+        # 서버 모드 선택
+        server_mode = select_server_mode()
+        is_debug = (server_mode == "development")
+        
+        print("")
+        print(f"🖥️ 서버 모드: {'개발 (Development)' if is_debug else '프로덕션 (Production)'}")
+        
+        # 이미지 생성 엔진 상태 표시
+        print("")
+        print("🖼️ 이미지 생성 엔진:")
+        if replicate_client.is_configured():
+            print("  ✅ Replicate API 활성화 - 실제 AI 모델 사용 중")
+        else:
+            print("  ⚠️ ComfyUI 폴백 모드 - Replicate 토큰 미설정")
+        
+        print("")
+        print(f"서버 시작: http://localhost:{port}")
+        print("=" * 50)
+        
+        if is_debug:
+            app.run(host='0.0.0.0', port=port, debug=True)
+        else:
+            app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
