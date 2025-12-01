@@ -19,7 +19,9 @@ env_path = Path(__file__).parent / '.env'
 load_dotenv(env_path)
 
 # 설정 (.env에서 로드)
-DB_PATH = Path(os.environ.get("DB_PATH", "D:/AI_Work/kampai.db"))
+# 클라우드 환경에서는 상대 경로 사용
+_default_db = Path(__file__).parent / "kampai.db"
+DB_PATH = Path(os.environ.get("DB_PATH", str(_default_db)))
 # JWT_SECRET: .env에 설정된 값 사용, 없으면 랜덤 생성 (서버 재시작 시 세션 무효화)
 JWT_SECRET = os.environ.get("JWT_SECRET") or secrets.token_hex(32)
 JWT_EXPIRY_HOURS = 24 * 7  # 7일
