@@ -2311,7 +2311,7 @@
                     document.getElementById('modelSelectSection').style.display = 'none';  // 모델 선택 숨김
                     promptInput.style.display = 'none';  // 프롬프트 불필요
                     document.getElementById('modeDescription').style.display = 'block';
-                    document.getElementById('modeDescription').innerHTML = '👗 <b>AI 피팅 (Virtual Try-On)</b>: 캐릭터/사람 이미지에 옷을 입힙니다<br>IDM-VTON 모델 사용 • Pro/Business 전용 • $0.034/회';
+                    document.getElementById('modeDescription').innerHTML = '👗 <b>AI 피팅 (Virtual Try-On)</b>: 캐릭터/사람 이미지에 옷을 입힙니다<br>IDM-VTON 모델 사용 • Pro/Business 전용';
                     showToast('캐릭터 이미지와 옷 이미지를 각각 업로드하세요. (Pro/Business 전용)', 'info');
                 }
                 else {
@@ -2808,7 +2808,7 @@
                     progressPercent.textContent = '100%';
                     progressLabel.textContent = '✨ AI 피팅 완료!';
                     resultCount.textContent = '1장';
-                    showToast(`AI 피팅 완료! (${data.time_taken || '?'}초, $${data.cost || 0.034})`, 'success');
+                    showToast(`AI 피팅 완료! (${data.time_taken || '?'}초)`, 'success');
                     
                     // 사용량 기록
                     if (authState.isLoggedIn) {
